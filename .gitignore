@@ -1,0 +1,13 @@
+.task
+.idea
+.vscode/*
+!.vscode/settings.json
+
+target
+logs
+coverage
+
+*.log
+*.db
+
+**/*.pem
