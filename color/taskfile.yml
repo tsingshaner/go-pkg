@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+env:
+  GO111MODULE: on
+  GOPROXY: https://goproxy.cn,direct
+
+tasks:
+  unit: go test -v ./color.go ./color_test.go
+
+  bench: go test -run=^$ -bench .
+
+  example: go run ./example/main.go

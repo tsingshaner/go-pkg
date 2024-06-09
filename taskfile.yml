@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+env:
+  GO111MODULE: on
+  GOPROXY: https://goproxy.cn,direct
+
+includes:
+  color:
+    dir: ./color
+    taskfile: ./color/taskfile.yml
+  log:
+    dir: ./log
+    taskfile: ./log/taskfile.yml
+
+tasks:
+  default: task --list-all
+
+  githooks: git config core.hooksPath ./githooks
+
+  setup:
+    summary: setup project
+    cmds:
+      - task: githooks
+      - go mod download
+
+  unit:
+    cmds:
+      - task: color:unit

@@ -1,0 +1,15 @@
+#!/bin/sh
+
+STAGED_GO_FILES=$(git diff --cached --name-only -- '*.go')
+
+if [[ "$STAGED_GO_FILES" = "" ]]; then
+  exit 0
+fi
+
+for FILE in $STAGED_GO_FILES; do
+  echo -e "\x1b[1;32m fmt\x1b[0m: $FILE"
+  go fmt $FILE
+  git add $FILE
+done
+
+echo -e "\x1b[1;32minfo\x1b[0m: go files have been formatted"
