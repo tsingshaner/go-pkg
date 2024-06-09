@@ -1,6 +1,8 @@
 # 🎨 color
 
-A fast and lightweight color library for GoLanguage
+<p align="center"><img alt="snapshot" src="https://github.com/tsingshaner/go-pkg/assets/170866467/6cbba7b9-df1b-40de-8e67-45c37a0ccaa6" /></p>
+
+<p align="center">A fast and lightweight color library for Go language.</p>
 
 ## 📦 Usage
 
@@ -49,33 +51,12 @@ goos: windows
 goarch: amd64
 pkg: github.com/tsingshaner/go-pkg/color
 cpu: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz
-=== RUN   BenchmarkRed
-BenchmarkRed
-BenchmarkRed-8
-31155721                37.11 ns/op           16 B/op          1 allocs/op
+BenchmarkRed-8                  32791454                34.78 ns/op
+BenchmarkUnsafeMagenta-8        76925048                15.84 ns/op
+BenchmarkMulti-8                 9167505               120.5 ns/op
+BenchmarkUnsafeMulti-8          15919278                69.64 ns/op
 PASS
-ok      github.com/tsingshaner/go-pkg/color     1.231s
-
-=== RUN   BenchmarkMulti
-BenchmarkMulti
-BenchmarkMulti-8
- 9097593               128.6 ns/op            88 B/op          3 allocs/op
-PASS
-ok      github.com/tsingshaner/go-pkg/color     1.338s
-
-=== RUN   BenchmarkUnsafeMagenta
-BenchmarkUnsafeMagenta
-BenchmarkUnsafeMagenta-8
-70216500                18.10 ns/op            0 B/op          0 allocs/op
-PASS
-ok      github.com/tsingshaner/go-pkg/color     1.325s
-
-=== RUN   BenchmarkUnsafeMulti
-BenchmarkUnsafeMulti
-BenchmarkUnsafeMulti-8
-16142202                73.15 ns/op           48 B/op          1 allocs/op
-PASS
-ok      github.com/tsingshaner/go-pkg/color     1.289s
+ok      github.com/tsingshaner/go-pkg/color     4.878s
 ```
 
 ## ✨ Inspired
@@ -83,4 +64,4 @@ ok      github.com/tsingshaner/go-pkg/color     1.289s
  [`picocolors`](https://github.com/alexeyraspopov/picocolors)
 
 ## 📄 License
-[ISC](github.com/tsingshaner.com/go-pkg/LICENSE) License © 2024-Present [qingshaner](gitub.com/tsingshaner)
+[ISC](../LICENSE) License © 2024-Present [qingshaner](https://gitub.com/tsingshaner)
