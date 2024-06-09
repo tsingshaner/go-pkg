@@ -1,6 +1,7 @@
 package color
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,7 +26,28 @@ func TestEnable(t *testing.T) {
 	assert.Equal(t, defaultValue, IsEnabled())
 }
 
+func TestColorEnv(t *testing.T) {
+	originEnv := os.Getenv("NO_COLOR")
+	os.Setenv("NO_COLOR", "1")
+	ResetEnabled()
+	assert.False(t, IsEnabled())
+	os.Setenv("NO_COLOR", originEnv)
+
+	originEnv = os.Getenv("TERM")
+	os.Setenv("TERM", "dumb")
+	ResetEnabled()
+	assert.False(t, IsEnabled())
+	os.Setenv("TERM", originEnv)
+
+	originEnv = os.Getenv("FORCE_COLOR")
+	os.Setenv("FORCE_COLOR", "1")
+	ResetEnabled()
+	assert.True(t, IsEnabled())
+	os.Setenv("FORCE_COLOR", originEnv)
+}
+
 func TestSingle(t *testing.T) {
+	Enable()
 	redString := Red(text)
 
 	assert.Contains(t, redString, text)
@@ -38,12 +60,14 @@ func TestSingle(t *testing.T) {
 }
 
 func TestMulti(t *testing.T) {
+	Enable()
 	multiString := Underline(Bold(Red(text)))
 
 	assert.Contains(t, multiString, text)
 }
 
 func TestUnsafe(t *testing.T) {
+	Enable()
 	redString := UnsafeRed(text)
 
 	assert.Contains(t, redString, text)
@@ -56,6 +80,7 @@ func TestUnsafe(t *testing.T) {
 }
 
 func TestUnsafeMulti(t *testing.T) {
+	Enable()
 	multiString := UnsafeUnderline(UnsafeBold(UnsafeRed(text)))
 
 	assert.Contains(t, multiString, text)
@@ -65,18 +90,21 @@ func TestUnsafeMulti(t *testing.T) {
 }
 
 func TestUnsafeWithFail(t *testing.T) {
+	Enable()
 	mixinString := UnsafeRed(" red " + Green(" green ") + " no color ")
 
 	assert.Equal(t, "\x1b[31m red \x1b[32m green \x1b[39m no color \x1b[39m", mixinString)
 }
 
 func TestSafeFormat(t *testing.T) {
+	Enable()
 	mixinString := Red(" red " + Green(" green ") + " red ")
 
 	assert.Equal(t, "\x1b[31m red \x1b[32m green \x1b[31m red \x1b[39m", mixinString)
 }
 
 func TestBoldAndDimIsSafe(t *testing.T) {
+	Enable()
 	mixinString := Bold(" bold " + Dim(" dim ") + " bold ")
 	assert.Equal(t, "\x1b[1m bold \x1b[2m dim \x1b[22m\x1b[1m bold \x1b[22m", mixinString)
 
@@ -85,6 +113,7 @@ func TestBoldAndDimIsSafe(t *testing.T) {
 }
 
 func TestMultiStyle(t *testing.T) {
+	Enable()
 	mixinString := Underline(Bold(Dim(" dim " + Red(" red ") + " dim ")))
 	assert.Equal(t,
 		"\x1b[4m\x1b[1m\x1b[2m dim \x1b[31m red \x1b[39m dim \x1b[22m\x1b[1m\x1b[22m\x1b[24m",

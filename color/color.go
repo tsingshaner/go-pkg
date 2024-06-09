@@ -72,8 +72,10 @@ func Enable() {
 
 // ResetEnabled resets the color output to the default value.
 func ResetEnabled() {
-	colorEnabled = os.Getenv("NO_COLOR") != "" || os.Getenv("TERM") == "dumb" ||
-		(!isatty.IsTerminal(os.Stdout.Fd()) && !isatty.IsCygwinTerminal(os.Stdout.Fd()))
+	fd := os.Stdout.Fd()
+
+	colorEnabled = os.Getenv("NO_COLOR") == "" && os.Getenv("TERM") != "dumb" &&
+		(os.Getenv("FORCE_COLOR") != "" || isatty.IsTerminal(fd) || isatty.IsCygwinTerminal(fd))
 }
 
 // Disable color output.
