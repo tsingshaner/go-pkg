@@ -12,6 +12,9 @@ includes:
   log:
     dir: ./log
     taskfile: ./log/taskfile.yml
+  oss:
+    dir: ./oss
+    taskfile: ./oss/taskfile.yml
 
 tasks:
   default: task --list-all

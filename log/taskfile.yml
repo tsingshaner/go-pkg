@@ -5,5 +5,16 @@ env:
   GO111MODULE: on
   GOPROXY: https://goproxy.cn,direct
 
+interval: 100ms
+
 tasks:
-  example: go run ./example/main.go
+  example:
+    sources:
+      - example/**/*.go
+      - cli/**/*.go
+    cmd: go run ./example/main.go | go run ./cli/main.go --preset=gin,slog
+
+  build:cli:
+    summary: build cli
+    cmds:
+      - go build -o ./target/cli.exe ./cli
