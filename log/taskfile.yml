@@ -9,9 +9,7 @@ interval: 100ms
 
 tasks:
   example:
-    sources:
-      - example/**/*.go
-      - cli/**/*.go
+    sources: ['**/*.go']
     cmd: go run ./example/main.go | go run ./cli/main.go --preset=gin,slog
 
   build:cli:
