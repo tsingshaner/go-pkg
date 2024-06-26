@@ -2,7 +2,9 @@ go 1.22
 
 use (
 	./color
+	./internal
 	./log
 	./oss
+	./prettylog
 	./util
 )

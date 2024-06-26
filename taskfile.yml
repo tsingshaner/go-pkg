@@ -9,20 +9,30 @@ includes:
   color:
     dir: ./color
     taskfile: ./color/taskfile.yml
+
   log:
     dir: ./log
     taskfile: ./log/taskfile.yml
+
   oss:
     dir: ./oss
     taskfile: ./oss/taskfile.yml
 
-tasks:
-  default: task --list-all
+  _:
+    dir: ./internal
+    taskfile: ./internal/taskfile.yml
 
-  githooks: git config core.hooksPath ./githooks
+tasks:
+  default:
+    desc: show help
+    cmd: task --list-all
+
+  githooks:
+    desc: setup git hooks
+    cmd: git config core.hooksPath ./internal/githooks
 
   setup:
-    summary: setup project
+    desc: setup project
     cmds:
       - task: githooks
       - go mod download
