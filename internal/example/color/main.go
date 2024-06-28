@@ -41,7 +41,7 @@ func main() {
 	println(
 		color.Italic(
 			color.Red(
-				color.Bold(color.Yellow("http://")) + color.Cyan("qingshaner.com"),
+				color.Bold(color.Yellow("https://")) + color.Cyan("qingshaner.com"),
 			)),
 	)
 

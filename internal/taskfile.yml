@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+env:
+  GO111MODULE: on
+  GOPROXY: https://goproxy.cn,direct
+
+tasks:
+  example:color: go run ./example/color/main.go
+
+  example:log: go run ./example/log/main.go
+
+  example:prettylog: task example:log | go run ../prettylog/cmd/prettylog/main.go

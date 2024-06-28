@@ -10,4 +10,3 @@ tasks:
 
   bench: go test -run=^$ -bench .
 
-  example: go run ./example/main.go
