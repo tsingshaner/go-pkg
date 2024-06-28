@@ -4,6 +4,11 @@
 
 <p align="center">A fast and lightweight color library for Go language.</p>
 
+<p align="center">
+<a href="https://pkg.go.dev/github.com/tsingshaner/go-pkg/color" alt="Go Reference"><img src="https://pkg.go.dev/badge/github.com/tsingshaner/go-pkg/color.svg" /></a>
+<a alt="Go Report Card" href="https://goreportcard.com/report/github.com/tsingshaner/go-pkg/color"><img src="https://goreportcard.com/badge/github.com/tsingshaner/go-pkg/color" /></a>
+</p>
+
 ## 📦 Usage
 
 ```bash
@@ -59,9 +64,10 @@ PASS
 ok      github.com/tsingshaner/go-pkg/color     4.878s
 ```
 
-## ✨ Inspired
+## ✨ Inspired By
 
- [`picocolors`](https://github.com/alexeyraspopov/picocolors)
+[`picocolors`](https://github.com/alexeyraspopov/picocolors)
 
 ## 📄 License
+
 [ISC](../LICENSE) License © 2024-Present [qingshaner](https://gitub.com/tsingshaner)
