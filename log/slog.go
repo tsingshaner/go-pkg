@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"github.com/tsingshaner/go-pkg/util"
 )
 
 const (
@@ -94,14 +96,15 @@ type Options struct {
 }
 
 // NewSlog base on go std lib log/slog
-func NewSlog(w io.Writer, slogOpts *SlogHandlerOptions, fns ...func(*Options)) *Slogger {
-	loggerOpts := &Options{
+func NewSlog(
+	w io.Writer,
+	slogOpts *SlogHandlerOptions,
+	fns ...util.WithFn[Options],
+) Logger[slog.Attr, slog.Level] {
+	loggerOpts := util.BuildWithOpts(&Options{
 		addSource:  slogOpts.AddSource,
 		SkipCaller: 0,
-	}
-	for _, fn := range fns {
-		fn(loggerOpts)
-	}
+	}, fns...)
 
 	return &Slogger{slog.New(NewSlogHandler(w, slogOpts)), loggerOpts}
 }
@@ -130,7 +133,7 @@ func (s *Slogger) Fatal(msg string, attrs ...slog.Attr) {
 	s.logAttrs(context.Background(), LevelFatal, msg, attrs)
 }
 
-func (s *Slogger) Child(attrs ...slog.Attr) *Slogger {
+func (s *Slogger) Child(attrs ...slog.Attr) Logger[slog.Attr, slog.Level] {
 	if len(attrs) == 0 {
 		return s
 	}
@@ -147,7 +150,7 @@ func (s *Slogger) Log(ctx context.Context, level slog.Level, msg string, attrs .
 	s.logAttrs(ctx, level, msg, attrs)
 }
 
-func (s *Slogger) WithGroup(name string) *Slogger {
+func (s *Slogger) WithGroup(name string) Logger[slog.Attr, slog.Level] {
 	if name == "" {
 		return s
 	}
