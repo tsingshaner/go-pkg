@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log/slog"
 	"path/filepath"
@@ -11,17 +12,6 @@ import (
 	"github.com/tsingshaner/go-pkg/util"
 )
 
-const (
-	LevelSilent slog.Level = -1
-	LevelTrace  slog.Level = 1 << 0
-	LevelDebug  slog.Level = 1 << 1
-	LevelInfo   slog.Level = 1 << 2
-	LevelWarn   slog.Level = 1 << 3
-	LevelError  slog.Level = 1 << 4
-	LevelFatal  slog.Level = 1 << 5
-	LevelAll    slog.Level = LevelTrace | LevelDebug | LevelInfo | LevelWarn | LevelError | LevelFatal
-)
-
 type SlogHandler struct {
 	Handler slog.Handler
 	Level   slog.Level
@@ -29,37 +19,53 @@ type SlogHandler struct {
 
 type SlogHandlerOptions = slog.HandlerOptions
 
-func NewSlogHandler(w io.Writer, opts *SlogHandlerOptions) slog.Handler {
-	if opts.AddSource && opts.ReplaceAttr == nil {
-		opts.ReplaceAttr = func(groups []string, a slog.Attr) slog.Attr {
-			if a.Key == slog.SourceKey {
-				source := a.Value.Any().(*slog.Source)
-				source.File = filepath.Base(source.File)
-			}
+func SlogLevelTag(level slog.Level) slog.Value {
+	switch level {
+	case SlogLevelTrace:
+		return slog.StringValue("trace")
+	case SlogLevelDebug:
+		return slog.StringValue("debug")
+	case SlogLevelInfo:
+		return slog.StringValue("info")
+	case SlogLevelWarn:
+		return slog.StringValue("warn")
+	case SlogLevelError:
+		return slog.StringValue("error")
+	case SlogLevelFatal:
+		return slog.StringValue("fatal")
+	}
 
-			if a.Key == slog.LevelKey {
-				level := a.Value.Any().(slog.Level)
-				switch level {
-				case LevelTrace:
-					a.Value = slog.StringValue("trace")
-				case LevelDebug:
-					a.Value = slog.StringValue("debug")
-				case LevelInfo:
-					a.Value = slog.StringValue("info")
-				case LevelWarn:
-					a.Value = slog.StringValue("warn")
-				case LevelError:
-					a.Value = slog.StringValue("error")
-				case LevelFatal:
-					a.Value = slog.StringValue("fatal")
+	return slog.StringValue(level.String())
+}
+
+func NewSlogHandler(w io.Writer, opts *SlogHandlerOptions) slog.Handler {
+	if opts.ReplaceAttr == nil {
+		if opts.AddSource {
+			opts.ReplaceAttr = func(groups []string, a slog.Attr) slog.Attr {
+				if a.Key == slog.SourceKey {
+					a.Key = "src"
+					source := a.Value.Any().(*slog.Source)
+					source.File = filepath.Base(source.File)
+					a.Value = slog.StringValue(fmt.Sprintf("%s:%d %s", source.File, source.Line, source.Function))
 				}
+
+				if a.Key == slog.LevelKey {
+					a.Value = SlogLevelTag(a.Value.Any().(slog.Level))
+				}
+				return a
 			}
-			return a
+		} else {
+			opts.ReplaceAttr = func(groups []string, a slog.Attr) slog.Attr {
+				if a.Key == slog.LevelKey {
+					a.Value = SlogLevelTag(a.Value.Any().(slog.Level))
+				}
+				return a
+			}
 		}
 	}
 
 	if opts.Level == nil {
-		opts.Level = LevelInfo | LevelWarn | LevelError | LevelFatal
+		opts.Level = slog.Level(LevelInfo | LevelWarn | LevelError | LevelFatal)
 	}
 
 	return &SlogHandler{
@@ -87,6 +93,7 @@ func (sh *SlogHandler) WithGroup(name string) slog.Handler {
 type Slogger struct {
 	logger *slog.Logger
 	opts   *Options
+	name   string
 }
 
 type Options struct {
@@ -106,31 +113,31 @@ func NewSlog(
 		SkipCaller: 0,
 	}, fns...)
 
-	return &Slogger{slog.New(NewSlogHandler(w, slogOpts)), loggerOpts}
+	return &Slogger{slog.New(NewSlogHandler(w, slogOpts)), loggerOpts, ""}
 }
 
 func (s *Slogger) Trace(msg string, attrs ...slog.Attr) {
-	s.logAttrs(context.Background(), LevelTrace, msg, attrs)
+	s.logAttrs(context.Background(), SlogLevelTrace, msg, attrs)
 }
 
 func (s *Slogger) Debug(msg string, attrs ...slog.Attr) {
-	s.logAttrs(context.Background(), LevelDebug, msg, attrs)
+	s.logAttrs(context.Background(), SlogLevelDebug, msg, attrs)
 }
 
 func (s *Slogger) Info(msg string, attrs ...slog.Attr) {
-	s.logAttrs(context.Background(), LevelInfo, msg, attrs)
+	s.logAttrs(context.Background(), SlogLevelInfo, msg, attrs)
 }
 
 func (s *Slogger) Warn(msg string, attrs ...slog.Attr) {
-	s.logAttrs(context.Background(), LevelWarn, msg, attrs)
+	s.logAttrs(context.Background(), SlogLevelWarn, msg, attrs)
 }
 
 func (s *Slogger) Error(msg string, attrs ...slog.Attr) {
-	s.logAttrs(context.Background(), LevelError, msg, attrs)
+	s.logAttrs(context.Background(), SlogLevelError, msg, attrs)
 }
 
 func (s *Slogger) Fatal(msg string, attrs ...slog.Attr) {
-	s.logAttrs(context.Background(), LevelFatal, msg, attrs)
+	s.logAttrs(context.Background(), SlogLevelFatal, msg, attrs)
 }
 
 func (s *Slogger) Child(attrs ...slog.Attr) Logger[slog.Attr, slog.Level] {
@@ -143,7 +150,18 @@ func (s *Slogger) Child(attrs ...slog.Attr) Logger[slog.Attr, slog.Level] {
 		args = append(args, attr)
 	}
 
-	return &Slogger{s.logger.With(args...), s.opts}
+	return &Slogger{s.logger.With(args...), s.opts, s.name}
+}
+
+func (s *Slogger) Named(name string) Logger[slog.Attr, slog.Level] {
+	if name == "" {
+		return s
+	}
+	if s.name == "" {
+		return &Slogger{s.logger, s.opts, name}
+	}
+
+	return &Slogger{s.logger, s.opts, s.name + "." + name}
 }
 
 func (s *Slogger) Log(ctx context.Context, level slog.Level, msg string, attrs ...slog.Attr) {
@@ -155,7 +173,7 @@ func (s *Slogger) WithGroup(name string) Logger[slog.Attr, slog.Level] {
 		return s
 	}
 
-	return &Slogger{s.logger.WithGroup(name), s.opts}
+	return &Slogger{s.logger.WithGroup(name), s.opts, s.name}
 }
 
 // logAttrs for record callers
@@ -176,6 +194,11 @@ func (s *Slogger) logAttrs(ctx context.Context, level slog.Level, msg string, at
 		pc = pcs[0]
 	}
 	r := slog.NewRecord(time.Now(), level, msg, pc)
+
+	if s.name != "" {
+		r.AddAttrs(slog.String("name", s.name))
+	}
+
 	r.AddAttrs(attrs...)
 	if ctx == nil {
 		ctx = context.Background()
