@@ -8,8 +8,8 @@ import (
 
 func main() {
 	prettylog.JSONReader(func(ro *prettylog.ReaderOptions) {
-		ro.Formatter = func(d formatter.Data, b []byte) string {
-			return formatter.Formatter(adapter.SlogAdaptor(d, b))
+		ro.Formatter = func(d formatter.Data, _ []byte) string {
+			return formatter.Formatter(adapter.DefaultAdaptor(d, nil))
 		}
 	})
 }

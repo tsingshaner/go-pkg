@@ -11,8 +11,9 @@ import (
 )
 
 type slogLog struct {
+	name	  string
 	level     string
-	timestamp time.Time
+	time time.Time
 	msg       string
 	pid       int
 	src       *slog.Source
@@ -20,19 +21,24 @@ type slogLog struct {
 	data      formatter.Data
 }
 
-func SlogAdaptor(data formatter.Data, log []byte) formatter.Log {
+func SlogAdaptor(data formatter.Data, _ []byte) formatter.Log {
 	l := &slogLog{
 		data: data,
 	}
 
-	if err, ok := data[slog.LevelKey].(string); ok {
-		l.level = err
+	if name, ok := data["name"].(string); ok {
+		l.name = name
+		delete(l.data, "name")
+	}
+
+	if level, ok := data[slog.LevelKey].(string); ok {
+		l.level = level
 		delete(l.data, slog.LevelKey)
 	}
 
 	if ts, ok := data[slog.TimeKey].(string); ok {
 		if date, err := time.Parse(time.RFC3339Nano, ts); err == nil {
-			l.timestamp = date
+			l.time = date
 			delete(l.data, slog.TimeKey)
 		}
 	}
@@ -65,12 +71,16 @@ func SlogAdaptor(data formatter.Data, log []byte) formatter.Log {
 	return l
 }
 
+func (sl *slogLog) Name() string {
+	return sl.name
+}
+
 func (sl *slogLog) Level() string {
 	return sl.level
 }
 
-func (sl *slogLog) Timestamp() time.Time {
-	return sl.timestamp
+func (sl *slogLog) Time() time.Time {
+	return sl.time
 }
 
 func (sl *slogLog) Msg() string {

@@ -11,7 +11,6 @@ func Map(data Data, prefix, mapKey string, parseDepth int) *strings.Builder {
 	builder := &strings.Builder{}
 	builder.WriteString(prefix)
 	builder.WriteString(color.UnsafeBold(color.UnsafeBlue(mapKey)))
-	builder.WriteString(color.Cyan(" {"))
 
 	if parseDepth > 0 {
 		nestings := make(map[string]Data, len(data))
@@ -37,14 +36,13 @@ func Map(data Data, prefix, mapKey string, parseDepth int) *strings.Builder {
 		}
 	}
 
-	builder.WriteString(color.Cyan(" }"))
-
 	return builder
 }
 
 func writeItem(w *strings.Builder, key string, value any) {
 	w.WriteString(" ")
-	w.WriteString(key)
+	w.WriteString(color.UnsafeItalic(key))
 	w.WriteString(color.UnsafeDim("="))
-	w.WriteString(color.Bold(fmt.Sprintf("%v", value)))
+	w.WriteString(fmt.Sprintf("%v", value))
+	w.WriteString(color.UnsafeDim(","))
 }
