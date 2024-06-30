@@ -29,12 +29,11 @@ func createWriter() io.Writer {
 
 func exampleCustomSlog(w io.Writer) {
 	logger := log.NewSlog(w, &log.SlogHandlerOptions{
-		Level:     log.LevelAll,
+		Level:     slog.Level(log.LevelAll),
 		AddSource: true,
 	})
 
-	child := logger.Child(
-		slog.String("app", "custom_slog"),
+	child := logger.Named("custom").Named("slog").Child(
 		slog.String("version", "v1.0.0"),
 		slog.Int("pid", os.Getpid()),
 	)
@@ -56,4 +55,11 @@ func exampleCustomSlog(w io.Writer) {
 
 	logger.Fatal("custom slog fatal")
 	child.Fatal("custom slog child fatal")
+
+	namedLogger := logger.Named("app").Named("user").Named("repo").Named("sql")
+	namedLogger.Info("custom slog named logger")
+
+	grouped := logger.WithGroup("group")
+	grouped.Info("custom slog with group")
+	grouped.Info("custom slog with group", slog.String("key", "value"))
 }

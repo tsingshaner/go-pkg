@@ -8,6 +8,11 @@ env:
 tasks:
   example:color: go run ./example/color/main.go
 
-  example:log: go run ./example/log/main.go
+  example:log:slog: go run ./example/log/slog/main.go
 
-  example:prettylog: task example:log | go run ../prettylog/cmd/prettylog/main.go
+  example:log:zap: go run ./example/log/zap/main.go
+
+  example:prettylog:
+    cmds:
+      - task example:log:slog | go run ../prettylog/cmd/prettylog/main.go
+      - task example:log:zap | go run ../prettylog/cmd/prettylog/main.go
