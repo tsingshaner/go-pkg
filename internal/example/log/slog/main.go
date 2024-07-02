@@ -28,7 +28,7 @@ func createWriter() io.Writer {
 }
 
 func exampleCustomSlog(w io.Writer) {
-	logger := log.NewSlog(w, &log.SlogHandlerOptions{
+	logger, levelToggler := log.NewSlog(w, &log.SlogHandlerOptions{
 		Level:     slog.Level(log.LevelAll),
 		AddSource: true,
 	})
@@ -62,4 +62,11 @@ func exampleCustomSlog(w io.Writer) {
 	grouped := logger.WithGroup("group")
 	grouped.Info("custom slog with group")
 	grouped.Info("custom slog with group", slog.String("key", "value"))
+
+	levelToggler(log.LevelError | log.LevelFatal)
+	grouped.Debug("not print")
+	grouped.Info("not print")
+	grouped.Warn("not print")
+	grouped.Error("error print")
+	grouped.Fatal("fatal print", slog.String("key", "value"))
 }

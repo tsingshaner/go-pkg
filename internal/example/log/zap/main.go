@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"os"
 
 	"github.com/tsingshaner/go-pkg/log"
@@ -10,30 +9,25 @@ import (
 )
 
 func main() {
-	w := createWriter()
 	println("------custom zap------")
-	exampleCustomZap(w)
+	exampleCustomZap()
 }
 
-func createWriter() io.Writer {
-	fw, err := log.NewFileWriter(func(config *log.FileConfig) {
-		config.Filepath = "testdata/log_zap.log"
-		config.Compress = true
-	})
-
-	if err != nil {
-		panic(err)
-	}
-
-	return log.NewWriter(fw, os.Stdout)
-}
-
-func exampleCustomZap(w io.Writer) {
-	logger := log.NewZapLogger(log.NewZapCore(
+func exampleCustomZap() {
+	core, levelToggler := log.NewZapCore(
 		log.NewZapJSONEncoder(),
 		zapcore.AddSync(os.Stdout),
 		log.LevelAll,
-	), zap.AddCaller(), zap.AddCallerSkip(2))
+	)
+
+	stackLevelFunc, stackLevelToggler := log.NewZapLevelFilter(log.LevelError | log.LevelFatal)
+
+	logger := log.NewZapLogger(
+		core,
+		zap.AddCaller(),
+		zap.AddCallerSkip(2),
+		zap.AddStacktrace(stackLevelFunc),
+	)
 
 	child := logger.Named("custom").Named("zap").Child(
 		zap.String("version", "v1.0.0"),
@@ -55,6 +49,9 @@ func exampleCustomZap(w io.Writer) {
 	logger.Error("custom zap error")
 	child.Error("custom zap child error")
 
+	logger.Fatal("custom zap fatal")
+	child.Fatal("custom zap child fatal")
+
 	namedLogger := logger.Named("app").Named("user").Named("repo").Named("sql")
 	namedLogger.Info("custom zap named logger")
 
@@ -62,6 +59,15 @@ func exampleCustomZap(w io.Writer) {
 	grouped.Info("custom zap with group")
 	grouped.Info("custom zap with group", zap.String("key", "value"))
 
-	logger.Fatal("custom zap fatal")
-	child.Fatal("custom zap child fatal")
+	levelToggler(log.LevelError | log.LevelFatal)
+	namedLogger.Trace("not print")
+	namedLogger.Debug("not print")
+	namedLogger.Info("not print")
+	namedLogger.Warn("not print")
+	namedLogger.Error("error print")
+	namedLogger.Fatal("fatal print")
+
+	stackLevelToggler(log.LevelFatal)
+	namedLogger.Error("error print without stack")
+	namedLogger.Fatal("fatal print with stack")
 }
