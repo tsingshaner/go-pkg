@@ -8,6 +8,12 @@ import (
 )
 
 type Level = int8
+type LevelToggler func(Level)
+
+// LogLevel is a wrapper for dynamically changing log level.
+type LogLevel[T ~int | ~int8 | ~int16] struct {
+	value T
+}
 
 const (
 	LevelSilent Level = -1
@@ -50,7 +56,7 @@ var (
 	slogLevelStringFatal = slog.StringValue(Fatal)
 )
 
-func SlogLevelEncode(level slog.Level) slog.Value {
+func SlogLevelEncoder(level slog.Level) slog.Value {
 	switch level {
 	case SlogLevelTrace:
 		return slogLevelStringTrace

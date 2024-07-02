@@ -14,7 +14,7 @@ func (m mockWriter) Write(p []byte) (n int, err error) {
 }
 
 func BenchmarkCustomSlog(b *testing.B) {
-	logger := NewSlog(&mockWriter{}, &SlogHandlerOptions{})
+	logger, _ := NewSlog(&mockWriter{}, &SlogHandlerOptions{})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -50,7 +50,7 @@ func BenchmarkOriginSlog(b *testing.B) {
 }
 
 func BenchmarkCustomSlogWithSource(b *testing.B) {
-	logger := NewSlog(&mockWriter{}, &SlogHandlerOptions{AddSource: true})
+	logger, _ := NewSlog(&mockWriter{}, &SlogHandlerOptions{AddSource: true})
 	child := logger.Child(slog.Int("pid", 111))
 
 	b.ResetTimer()
@@ -86,7 +86,7 @@ func BenchmarkOriginSlogWithSource(b *testing.B) {
 }
 
 func BenchmarkCustomSlogDisable(b *testing.B) {
-	logger := NewSlog(&mockWriter{}, &SlogHandlerOptions{Level: slog.LevelError})
+	logger, _ := NewSlog(&mockWriter{}, &SlogHandlerOptions{Level: slog.LevelError})
 
 	b.ResetTimer()
 	for i := 0; i < 1000000; i++ {

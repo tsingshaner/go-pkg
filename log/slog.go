@@ -2,93 +2,13 @@ package log
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log/slog"
-	"path/filepath"
 	"runtime"
 	"time"
 
 	"github.com/tsingshaner/go-pkg/util"
 )
-
-type SlogHandler struct {
-	Handler slog.Handler
-	Level   slog.Level
-}
-
-type SlogHandlerOptions = slog.HandlerOptions
-
-func SlogLevelTag(level slog.Level) slog.Value {
-	switch level {
-	case SlogLevelTrace:
-		return slog.StringValue("trace")
-	case SlogLevelDebug:
-		return slog.StringValue("debug")
-	case SlogLevelInfo:
-		return slog.StringValue("info")
-	case SlogLevelWarn:
-		return slog.StringValue("warn")
-	case SlogLevelError:
-		return slog.StringValue("error")
-	case SlogLevelFatal:
-		return slog.StringValue("fatal")
-	}
-
-	return slog.StringValue(level.String())
-}
-
-func NewSlogHandler(w io.Writer, opts *SlogHandlerOptions) slog.Handler {
-	if opts.ReplaceAttr == nil {
-		if opts.AddSource {
-			opts.ReplaceAttr = func(groups []string, a slog.Attr) slog.Attr {
-				if a.Key == slog.SourceKey {
-					a.Key = "src"
-					source := a.Value.Any().(*slog.Source)
-					source.File = filepath.Base(source.File)
-					a.Value = slog.StringValue(fmt.Sprintf("%s:%d %s", source.File, source.Line, source.Function))
-				}
-
-				if a.Key == slog.LevelKey {
-					a.Value = SlogLevelTag(a.Value.Any().(slog.Level))
-				}
-				return a
-			}
-		} else {
-			opts.ReplaceAttr = func(groups []string, a slog.Attr) slog.Attr {
-				if a.Key == slog.LevelKey {
-					a.Value = SlogLevelTag(a.Value.Any().(slog.Level))
-				}
-				return a
-			}
-		}
-	}
-
-	if opts.Level == nil {
-		opts.Level = slog.Level(LevelInfo | LevelWarn | LevelError | LevelFatal)
-	}
-
-	return &SlogHandler{
-		Handler: slog.NewJSONHandler(w, opts),
-		Level:   opts.Level.Level(),
-	}
-}
-
-func (sh *SlogHandler) Handle(ctx context.Context, r slog.Record) error {
-	return sh.Handler.Handle(ctx, r)
-}
-
-func (sh *SlogHandler) Enabled(_ context.Context, level slog.Level) bool {
-	return sh.Level&level == level
-}
-
-func (sh *SlogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
-	return &SlogHandler{sh.Handler.WithAttrs(attrs), sh.Level}
-}
-
-func (sh *SlogHandler) WithGroup(name string) slog.Handler {
-	return &SlogHandler{sh.Handler.WithGroup(name), sh.Level}
-}
 
 type Slogger struct {
 	logger *slog.Logger
@@ -107,14 +27,18 @@ func NewSlog(
 	w io.Writer,
 	slogOpts *SlogHandlerOptions,
 	fns ...util.WithFn[Options],
-) Logger[slog.Attr, slog.Level] {
+) (Logger[slog.Attr, slog.Level], LevelToggler) {
 	loggerOpts := util.BuildWithOpts(&Options{
 		addSource:  slogOpts.AddSource,
 		SkipCaller: 0,
 	}, fns...)
 
-	return &Slogger{slog.New(NewSlogHandler(w, slogOpts)), loggerOpts, ""}
+	handler, levelToggler := NewSlogHandler(w, slogOpts)
+
+	return &Slogger{slog.New(handler), loggerOpts, ""}, levelToggler
 }
+
+func (s *Slogger) Sync() error { return nil }
 
 func (s *Slogger) Trace(msg string, attrs ...slog.Attr) {
 	s.logAttrs(context.Background(), SlogLevelTrace, msg, attrs)
