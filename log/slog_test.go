@@ -8,23 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type mockedBoard struct {
-	records [][]byte
-}
-
-func (m *mockedBoard) Write(p []byte) (n int, err error) {
-	m.records = append(m.records, p)
-	return len(p), nil
-}
-
-func (m *mockedBoard) Flush() {
-	m.records = m.records[:0]
-}
-
-func (m *mockedBoard) Size() int {
-	return len(m.records)
-}
-
 func TestSlog(t *testing.T) {
 	board := &mockedBoard{}
 	logger, _ := NewSlog(board, &SlogHandlerOptions{
@@ -47,15 +30,17 @@ func TestSlog(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		board.Flush()
-		message := fmt.Sprintf("test %s", tc.level)
+		t.Run(tc.level, func(t *testing.T) {
+			board.Flush()
+			message := fmt.Sprintf("test %s", tc.level)
 
-		tc.logFunc(message)
+			tc.logFunc(message)
 
-		assert.Equal(t, 1, board.Size())
-		assert.Contains(t, string(board.records[0]), fmt.Sprintf("\"msg\":\"%s\"", message))
-		assert.Contains(t, string(board.records[0]), "\"time\":")
-		assert.Contains(t, string(board.records[0]), fmt.Sprintf("\"level\":\"%s\"", tc.level))
+			assert.Equal(t, 1, board.Size())
+			assert.Contains(t, string(board.records[0]), fmt.Sprintf("\"msg\":\"%s\"", message))
+			assert.Contains(t, string(board.records[0]), "\"time\":")
+			assert.Contains(t, string(board.records[0]), fmt.Sprintf("\"level\":\"%s\"", tc.level))
+		})
 	}
 }
 
@@ -92,14 +77,17 @@ func TestSlogLevelToggle(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		levelToggler(tc.level)
+		t.Run(fmt.Sprintf("level(%d)", tc.level), func(t *testing.T) {
+			levelToggler(tc.level)
 
-		for _, e := range tc.expects {
-			board.Flush()
-			e.fn("test level")
+			for _, e := range tc.expects {
+				board.Flush()
+				e.fn("test level")
 
-			assert.Equal(t, e.enabled, board.Size() == 1)
-		}
+				assert.Equal(t, e.enabled, board.Size() == 1)
+			}
+		})
+
 	}
 }
 
@@ -212,7 +200,7 @@ func TestSlogSource(t *testing.T) {
 	assert.Equal(t, 1, board.Size())
 	assert.Contains(t, string(board.records[0]), "\"msg\":\"test source\"")
 	assert.Contains(t, string(board.records[0]),
-		"\"src\":\"slog_test.go:210 github.com/tsingshaner/go-pkg/log.TestSlogSource\"")
+		"\"src\":\"slog_test.go:198 github.com/tsingshaner/go-pkg/log.TestSlogSource\"")
 }
 
 func TestSlogSync(t *testing.T) {

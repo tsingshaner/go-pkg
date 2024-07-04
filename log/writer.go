@@ -1,6 +1,10 @@
 package log
 
-import "io"
+import (
+	"io"
+
+	"github.com/tsingshaner/go-pkg/util/slices"
+)
 
 type Writer interface {
 	io.Writer
@@ -11,7 +15,11 @@ type writerContainer struct {
 }
 
 func NewWriter(writers ...io.Writer) Writer {
-	return &writerContainer{writers}
+	notNilWriters := slices.Filter(writers, func(w io.Writer) bool {
+		return w != nil
+	})
+
+	return &writerContainer{notNilWriters}
 }
 
 // Write todo use slog.Handler impl
