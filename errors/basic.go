@@ -22,7 +22,11 @@ func (e *basicError) Code() int {
 }
 
 func (e *basicError) Is(target error) bool {
-	return target.(BasicError).Code() == e.code
+	if targetErr, ok := target.(BasicError); ok {
+		return targetErr.Code() == e.code
+	}
+
+	return false
 }
 
 func NewBasic(code int, msg string) error {

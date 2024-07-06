@@ -1,38 +1,37 @@
 package errors
 
 type restError struct {
-	msg    string
-	status string
-	basic  BasicError
+	basic  *basicError
+	status int
 }
 
-type RestError interface {
+type RESTError interface {
 	BasicError
-	Status() string
+	Status() int
 }
 
-var _ RestError = &restError{}
+var _ RESTError = &restError{}
 
 func (e *restError) Code() int {
 	return e.basic.Code()
 }
 
 func (e *restError) Error() string {
-	return e.msg
+	return e.basic.Error()
 }
 
-func (e *restError) Status() string {
+func (e *restError) Status() int {
 	return e.status
 }
 
 func (e *restError) Is(target error) bool {
-	return e.msg == target.Error() && target.(RestError).Status() == e.status
+	if restErr, ok := target.(RESTError); ok && restErr.Status() == e.status {
+		return e.basic.code == restErr.Code()
+	}
+
+	return false
 }
 
-func (e *restError) Unwrap() error {
-	return e.basic
-}
-
-func NewRestError(status, msg string, basic BasicError) error {
-	return &restError{msg, status, basic}
+func NewREST(status, code int, msg string) error {
+	return &restError{&basicError{msg, code}, status}
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBaseError(t *testing.T) {
+func TestBasicError(t *testing.T) {
 	baseErr := NewBasic(1, "base error")
 
 	t.Run("error", func(t *testing.T) {
@@ -19,8 +19,9 @@ func TestBaseError(t *testing.T) {
 	})
 
 	t.Run("is", func(t *testing.T) {
-		assert.True(t, errors.Is(NewBasic(1, "base error"), baseErr))
-		assert.False(t, errors.Is(NewBasic(2, "base error"), baseErr))
+		assert.True(t, errors.Is(baseErr, NewBasic(1, "base error")))
+		assert.False(t, errors.Is(baseErr, NewBasic(2, "base error")))
+		assert.False(t, errors.Is(baseErr, errors.New("base error")))
 	})
 
 	t.Run("as", func(t *testing.T) {
