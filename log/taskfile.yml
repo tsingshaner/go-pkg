@@ -8,11 +8,12 @@ env:
 interval: 100ms
 
 tasks:
-  example:
-    sources: ['**/*.go']
-    cmd: go run ./example/main.go | go run ./cli/main.go --preset=gin,slog
-
-  build:cli:
-    summary: build cli
+  bench:
+    summary: run benchmark
     cmds:
-      - go build -o ./target/cli.exe ./cli
+      - go test -bench=".*" > ./coverage/bench.txt
+
+  unit:
+    desc: run unit test
+    cmds:
+     - go test -v ./...

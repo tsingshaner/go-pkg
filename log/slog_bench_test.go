@@ -7,14 +7,8 @@ import (
 	"time"
 )
 
-type mockWriter struct{}
-
-func (m mockWriter) Write(p []byte) (n int, err error) {
-	return len(p), nil
-}
-
 func BenchmarkCustomSlog(b *testing.B) {
-	logger, _ := NewSlog(&mockWriter{}, &SlogHandlerOptions{})
+	logger, _ := NewSlog(&mockedBoard{}, &SlogHandlerOptions{})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -32,7 +26,7 @@ func BenchmarkCustomSlog(b *testing.B) {
 }
 
 func BenchmarkOriginSlog(b *testing.B) {
-	logger := slog.New(slog.NewJSONHandler(&mockWriter{}, &slog.HandlerOptions{}))
+	logger := slog.New(slog.NewJSONHandler(&mockedBoard{}, &slog.HandlerOptions{}))
 	child := logger.With(slog.Int("pid", 111))
 
 	b.ResetTimer()
@@ -50,7 +44,7 @@ func BenchmarkOriginSlog(b *testing.B) {
 }
 
 func BenchmarkCustomSlogWithSource(b *testing.B) {
-	logger, _ := NewSlog(&mockWriter{}, &SlogHandlerOptions{AddSource: true})
+	logger, _ := NewSlog(&mockedBoard{}, &SlogHandlerOptions{AddSource: true})
 	child := logger.Child(slog.Int("pid", 111))
 
 	b.ResetTimer()
@@ -68,7 +62,7 @@ func BenchmarkCustomSlogWithSource(b *testing.B) {
 }
 
 func BenchmarkOriginSlogWithSource(b *testing.B) {
-	logger := slog.New(slog.NewJSONHandler(&mockWriter{}, &slog.HandlerOptions{AddSource: true}))
+	logger := slog.New(slog.NewJSONHandler(&mockedBoard{}, &slog.HandlerOptions{AddSource: true}))
 	child := logger.With(slog.Int("pid", 111))
 
 	b.ResetTimer()
@@ -86,7 +80,7 @@ func BenchmarkOriginSlogWithSource(b *testing.B) {
 }
 
 func BenchmarkCustomSlogDisable(b *testing.B) {
-	logger, _ := NewSlog(&mockWriter{}, &SlogHandlerOptions{Level: slog.LevelError})
+	logger, _ := NewSlog(&mockedBoard{}, &SlogHandlerOptions{Level: slog.LevelError})
 
 	b.ResetTimer()
 	for i := 0; i < 1000000; i++ {
@@ -101,7 +95,7 @@ func BenchmarkCustomSlogDisable(b *testing.B) {
 }
 
 func BenchmarkOriginSlogDisable(b *testing.B) {
-	logger := slog.New(slog.NewJSONHandler(&mockWriter{}, &slog.HandlerOptions{Level: slog.LevelError}))
+	logger := slog.New(slog.NewJSONHandler(&mockedBoard{}, &slog.HandlerOptions{Level: slog.LevelError}))
 
 	b.ResetTimer()
 	for i := 0; i < 1000000; i++ {
