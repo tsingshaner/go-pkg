@@ -48,7 +48,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Dependencies
-        run: task install
+        run: go mod download
 
       - name: Run tests & generate coverage
         run: task cov
