@@ -1,18 +1,38 @@
 {
-  "go.formatTool": "gofmt",
-  "go.lintOnSave": "package",
-  "[go]": {
-    "editor.defaultFormatter": "golang.go",
-    "editor.insertSpaces": false,
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-      "source.fixAll": "explicit"
-    }
-  },
-  "cSpell.words": [
-    "gookit",
-    "rotatefile",
-    "taskfile",
-    "tsingshaner"
-  ]
+	"explorer.fileNesting.enabled": true,
+	"explorer.fileNesting.expand": false,
+	"explorer.fileNesting.patterns": {
+    "taskfile.yml": "go.work, go.work.sum, go.mod, go.sum",
+    "go.mod": "go.sum",
+		"go.work": "go.work.sum, .gitignore, .gitattributes, .gitmodules, .gitmessage, .mailmap, .git-blame*, .editorconfig",
+		"README.md": "LICENSE",
+		"*.go": "${capture}_test.go, ${capture}_bench_test.go"
+	},
+	"go.formatTool": "gofmt",
+	"go.lintOnSave": "package",
+	"[go]": {
+		"editor.defaultFormatter": "golang.go",
+		"editor.insertSpaces": false,
+		"editor.formatOnSave": true,
+		"editor.codeActionsOnSave": {
+			"source.fixAll": "explicit"
+		}
+	},
+	"cSpell.words": [
+		"allocs",
+		"bytedance",
+		"covdata",
+		"covermode",
+		"coverprofile",
+		"GOCOVERDIR",
+		"gomod",
+		"gookit",
+		"prettylog",
+		"rotatefile",
+		"stretchr",
+		"Syncer",
+		"taskfile",
+		"textfmt",
+		"tsingshaner"
+	]
 }

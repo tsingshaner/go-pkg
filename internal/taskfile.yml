@@ -1,6 +1,13 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
+vars:
+  # Define the coverage directory
+  COVERAGE_DIR: ./coverage
+  # Define the integration coverage directory
+  INTEGRATION_COVERAGE_DIR: ./coverage/integration
+  MOD_DIRS: [color, log/slog, log/zap]
+
 env:
   GO111MODULE: on
   GOPROXY: https://goproxy.cn,direct
@@ -16,3 +23,63 @@ tasks:
     cmds:
       - task example:log:slog | go run ../prettylog/cmd/prettylog/main.go
       - task example:log:zap | go run ../prettylog/cmd/prettylog/main.go
+
+  integration:
+    desc: run all integration tests
+    deps:
+      - for: { var: MOD_DIRS }
+        task: _integration
+        vars: { MOD: "{{.ITEM}}" }
+      - task: integration:prettylog
+    cmds:
+      - task: coverage:text
+      - task: coverage:percent
+
+  coverage:percent:
+    dir: ./coverage/integration
+    cmds:
+      - for: { var: MOD_DIRS }
+        cmd: go tool covdata percent -i=./{{.ITEM}}
+        vars: { MOD: "{{.ITEM}}" }
+      - go tool covdata percent -i=./prettylog
+
+  coverage:text:
+    dir: ./coverage/integration
+    cmds:
+      - go tool covdata textfmt -o=./coverage.out -i=log/slog,log/zap,color,prettylog
+
+  mkdir:cov:
+    cmds:
+      - cmd: powershell -Command "mkdir -Force -Path ./coverage/integration/{{.MOD}}"
+        platforms: [windows]
+      - cmd: mkdir -p ./coverage/integration/{{.MOD}}
+        platforms: [linux, darwin]
+
+  integration:prettylog:
+    deps:
+      - task: mkdir:cov
+        vars: { MOD: "prettylog" }
+    env:
+      GOCOVERDIR: ./coverage/integration/prettylog
+    cmds:
+      - cmd: go build -cover -o ./target/prettylog/app.exe ../prettylog/cmd/prettylog
+        platforms: [windows]
+      - cmd: task example:log:zap | ./target/prettylog/app.exe && task example:log:slog | ./target/prettylog/app.exe
+        platforms: [windows]
+      - cmd: go build -cover -o ./target/prettylog/app ../prettylog/cmd/prettylog
+        platforms: [linux, darwin]
+      - cmd: task example:log:zap | ./target/prettylog/app && task example:log:slog | ./target/prettylog/app
+        platforms: [linux, darwin]
+
+  _integration:
+    internal: true
+    deps:
+      - task: mkdir:cov
+        vars: { MOD: "{{.MOD}}" }
+    env:
+      GOCOVERDIR: ./coverage/integration/{{.MOD}}
+    cmds:
+      - cmd: go build -cover -o ./target/{{.MOD}}/app.exe ./example/{{.MOD}} && ./target/{{.MOD}}/app.exe
+        platforms: [windows]
+      - cmd: go build -cover -o ./target/{{.MOD}}/app ./example/{{.MOD}} && ./target/{{.MOD}}/app
+        platforms: [linux, darwin]

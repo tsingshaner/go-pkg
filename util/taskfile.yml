@@ -6,6 +6,4 @@ env:
   GOPROXY: https://goproxy.cn,direct
 
 tasks:
-  setup:
-    cmds:
-      - go mod download
+  tidy: go mod tidy
