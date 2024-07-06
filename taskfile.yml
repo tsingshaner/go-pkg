@@ -87,7 +87,7 @@ tasks:
     cmds:
       - cmd: powershell ./scripts/merge_unit_cov.ps1 -Mods '"{{.MODS}}"' -TotalCoverageOut {{.ALL_OUT}} -ModCoverageOut {{.COV_OUT}}
         platforms: [windows]
-      - cmd: ./scripts/merge_unit_cov.sh "{{.MODS}}" {{.ALL_OUT}} {{.COV_OUT}}
+      - cmd: bash ./scripts/merge_unit_cov.sh "{{.MODS}}" {{.ALL_OUT}} {{.COV_OUT}}
         platforms: [linux, darwin]
 
   cov:preview:
