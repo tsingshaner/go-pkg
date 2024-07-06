@@ -3,19 +3,19 @@ package adapter
 import (
 	"time"
 
-	"github.com/tsingshaner/go-pkg/color"
 	"github.com/tsingshaner/go-pkg/prettylog/formatter"
 )
 
 type defaultLog struct {
-	name 	string
-	level     string
-	time time.Time
-	msg       string
-	pid       int
-	src       string
-	err       string
-	data      formatter.Data
+	name  string
+	level string
+	time  time.Time
+	msg   string
+	pid   int
+	src   string
+	err   string
+	stack string
+	data  formatter.Data
 }
 
 func DefaultAdaptor(data formatter.Data, _ []byte) formatter.Log {
@@ -59,6 +59,11 @@ func DefaultAdaptor(data formatter.Data, _ []byte) formatter.Log {
 		delete(l.data, "err")
 	}
 
+	if stack, ok := data["stack"].(string); ok {
+		l.stack = stack
+		delete(l.data, "stack")
+	}
+
 	return l
 }
 
@@ -82,14 +87,16 @@ func (dl *defaultLog) Pid() int {
 	return dl.pid
 }
 
-var fnPrefix string = color.UnsafeCyan("()")
-
 func (dl *defaultLog) Src() string {
-	return dl.src + fnPrefix
+	return dl.src
 }
 
 func (dl *defaultLog) Err() string {
 	return dl.err
+}
+
+func (dl *defaultLog) Stack() string {
+	return dl.stack
 }
 
 func (dl *defaultLog) Data() formatter.Data {

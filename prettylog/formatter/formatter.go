@@ -18,6 +18,7 @@ type Log interface {
 	Src() string
 	Err() string
 	Data() Data
+	Stack() string
 }
 
 var propertyPrefix = color.Bold(color.UnsafeDim("    » "))
@@ -57,6 +58,13 @@ func Formatter(log Log) string {
 		sb.WriteString(Map(log.Data(), propertyPrefix, "ctx", 2).String())
 	}
 	sb.WriteByte('\n')
+
+	if log.Stack() != "" {
+		sb.WriteString(propertyPrefix)
+		sb.WriteString(color.UnsafeBold(color.UnsafeBlue("stack ")))
+		sb.WriteString(color.UnsafeDim(log.Stack()))
+		sb.WriteByte('\n')
+	}
 
 	return sb.String()
 }

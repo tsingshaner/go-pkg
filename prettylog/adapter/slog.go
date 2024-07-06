@@ -11,14 +11,15 @@ import (
 )
 
 type slogLog struct {
-	name	  string
-	level     string
-	time time.Time
-	msg       string
-	pid       int
-	src       *slog.Source
-	err       string
-	data      formatter.Data
+	name  string
+	level string
+	time  time.Time
+	msg   string
+	pid   int
+	src   *slog.Source
+	err   string
+	stack string
+	data  formatter.Data
 }
 
 func SlogAdaptor(data formatter.Data, _ []byte) formatter.Log {
@@ -68,7 +69,16 @@ func SlogAdaptor(data formatter.Data, _ []byte) formatter.Log {
 		delete(l.data, "err")
 	}
 
+	if stack, ok := data["stack"].(string); ok {
+		l.stack = stack
+		delete(l.data, "stack")
+	}
+
 	return l
+}
+
+func (sl *slogLog) Stack() string {
+	return sl.stack
 }
 
 func (sl *slogLog) Name() string {
