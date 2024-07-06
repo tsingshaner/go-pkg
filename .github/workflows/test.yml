@@ -4,6 +4,7 @@ on:
   push:
     branches: ["main"]
     paths:
+      - '.github/workflows/*'
       - 'color/**'
       - 'errors/**'
       - 'internal/**'
@@ -16,6 +17,7 @@ on:
   pull_request:
     branches: ["main"]
     paths:
+      - '.github/workflows/*'
       - 'color/**'
       - 'errors/**'
       - 'internal/**'
@@ -42,7 +44,7 @@ jobs:
             **/go.sum
 
       - name: Install Task
-        uses: arduino/setup-task@v1
+        uses: arduino/setup-task@v2
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
