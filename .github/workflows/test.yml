@@ -1,0 +1,60 @@
+name: test
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'color/**'
+      - 'errors/**'
+      - 'internal/**'
+      - 'log/**'
+      - 'util/**'
+      - 'oss/**'
+      - 'prettylog/**'
+      - 'go.work'
+      - 'go.work.sum'
+  pull_request:
+    branches: ["main"]
+    paths:
+      - 'color/**'
+      - 'errors/**'
+      - 'internal/**'
+      - 'log/**'
+      - 'util/**'
+      - 'oss/**'
+      - 'prettylog/**'
+      - 'go.work'
+      - 'go.work.sum'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: internal/go.mod
+          cache-dependency-path: |
+            go.work.sum
+            **/go.sum
+
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Dependencies
+        run: task install
+
+      - name: Run tests & generate coverage
+        run: task cov
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/coverage.out
+          token: ${{ secrets.CODECOV_TOKEN }}

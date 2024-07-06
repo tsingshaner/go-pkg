@@ -1,6 +1,9 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
+vars:
+  MODS: [color, errors, log, oss, util]
+
 env:
   GO111MODULE: on
   GOPROXY: https://goproxy.cn,direct
@@ -9,6 +12,10 @@ includes:
   color:
     dir: ./color
     taskfile: ./color/taskfile.yml
+
+  errors:
+    dir: ./errors
+    taskfile: ./errors/taskfile.yml
 
   log:
     dir: ./log
@@ -25,7 +32,10 @@ includes:
 tasks:
   default:
     desc: show help
-    cmd: task --list-all
+    cmds:
+      - go version
+      - task --version
+      - task --list-all
 
   githooks:
     desc: setup git hooks
@@ -37,6 +47,62 @@ tasks:
       - task: githooks
       - go mod download
 
-  unit:
+  tidy:
+    desc: go mod tidy for all sub packages
+    deps:
+      - for: { var: MODS }
+        task: _tidy
+        vars: { MOD: "{{.ITEM}}" }
+    cmd: go work sync
+  _tidy:
+    internal: true
+    dir: "./{{.MOD}}"
+    cmd: go mod tidy
+
+  cov:
+    desc: gen test coverages
+    deps:
+      - task: _:integration
+      - for: { var: MODS }
+        task: _cov
+        vars: { MOD: "{{.ITEM}}" }
+    cmd:
+      task: cov:merge
+  _cov:
+    internal: true
+    vars:
+      COV_OUT: ./coverage/cov_unit.txt
     cmds:
-      - task: color:unit
+      - cmd: powershell New-Item -ItemType Directory -Force -Path ./{{.MOD}}/coverage
+        platforms: [windows]
+      - cmd: mkdir -p ./{{.MOD}}/coverage
+        platforms: [linux, darwin]
+      - go test -coverprofile=./{{.MOD}}/{{.COV_OUT}} -covermode=atomic ./{{.MOD}}/...
+
+  cov:merge:
+    desc: merge coverage
+    vars:
+      COV_OUT: coverage/cov_unit.txt
+      ALL_OUT: coverage/coverage.out
+    cmds:
+      - cmd: powershell ./scripts/merge_unit_cov.ps1 -Mods '"{{.MODS}}"' -TotalCoverageOut {{.ALL_OUT}} -ModCoverageOut {{.COV_OUT}}
+        platforms: [windows]
+      - cmd: ./scripts/merge_unit_cov.sh "{{.MODS}}" {{.ALL_OUT}} {{.COV_OUT}}
+        platforms: [linux, darwin]
+
+  cov:preview:
+    desc: preview coverage report
+    deps:
+      - task: cov
+    cmd: go tool cover -html=./coverage/coverage.out -o ./coverage/cov.html
+
+  unit:
+    desc: run all unit tests
+    deps:
+      - for: { var: MODS }
+        task: _unit
+        vars: { MOD: "{{.ITEM}}" }
+  _unit:
+    internal: true
+    dir: "./{{.MOD}}"
+    cmd: go test -v ./...
