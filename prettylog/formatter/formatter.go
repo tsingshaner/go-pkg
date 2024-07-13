@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/tsingshaner/go-pkg/color"
+	"github.com/tsingshaner/go-pkg/log/helper"
 )
 
 type Data map[string]any
@@ -24,6 +25,11 @@ type Log interface {
 var propertyPrefix = color.Bold(color.UnsafeDim("    » "))
 
 func Formatter(log Log) string {
+	switch {
+	case strings.HasSuffix(log.Name(), helper.NameGinRouterLoggerSuffix):
+		return FormatGinRouter(log)
+	}
+
 	sb := strings.Builder{}
 	sb.WriteString(Level(log.Level()))
 
