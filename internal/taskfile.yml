@@ -24,6 +24,8 @@ tasks:
       - task example:log:slog | go run ../prettylog/cmd/prettylog/main.go
       - task example:log:zap | go run ../prettylog/cmd/prettylog/main.go
 
+  example:prettylog:gin: cat testdata/gin_router.logs | go run ../prettylog/cmd/prettylog/main.go
+
   integration:
     desc: run all integration tests
     deps:

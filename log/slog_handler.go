@@ -57,7 +57,7 @@ func (sh *SlogHandler) Handle(ctx context.Context, r slog.Record) error {
 }
 
 func (sh *SlogHandler) Enabled(_ context.Context, level slog.Level) bool {
-	return sh.Level.value&level == level
+	return (sh.Level.value & level) == level
 }
 
 func (sh *SlogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {

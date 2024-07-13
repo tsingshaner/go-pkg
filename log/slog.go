@@ -10,7 +10,7 @@ import (
 	"github.com/tsingshaner/go-pkg/util"
 )
 
-type Slogger struct {
+type slogger struct {
 	logger *slog.Logger
 	opts   *Options
 	name   string
@@ -35,36 +35,36 @@ func NewSlog(
 
 	handler, levelToggler := NewSlogHandler(w, slogOpts)
 
-	return &Slogger{slog.New(handler), loggerOpts, ""}, levelToggler
+	return &slogger{slog.New(handler), loggerOpts, ""}, levelToggler
 }
 
-func (s *Slogger) Sync() error { return nil }
+func (s *slogger) Sync() error { return nil }
 
-func (s *Slogger) Trace(msg string, attrs ...slog.Attr) {
+func (s *slogger) Trace(msg string, attrs ...slog.Attr) {
 	s.logAttrs(context.Background(), SlogLevelTrace, msg, attrs)
 }
 
-func (s *Slogger) Debug(msg string, attrs ...slog.Attr) {
+func (s *slogger) Debug(msg string, attrs ...slog.Attr) {
 	s.logAttrs(context.Background(), SlogLevelDebug, msg, attrs)
 }
 
-func (s *Slogger) Info(msg string, attrs ...slog.Attr) {
+func (s *slogger) Info(msg string, attrs ...slog.Attr) {
 	s.logAttrs(context.Background(), SlogLevelInfo, msg, attrs)
 }
 
-func (s *Slogger) Warn(msg string, attrs ...slog.Attr) {
+func (s *slogger) Warn(msg string, attrs ...slog.Attr) {
 	s.logAttrs(context.Background(), SlogLevelWarn, msg, attrs)
 }
 
-func (s *Slogger) Error(msg string, attrs ...slog.Attr) {
+func (s *slogger) Error(msg string, attrs ...slog.Attr) {
 	s.logAttrs(context.Background(), SlogLevelError, msg, attrs)
 }
 
-func (s *Slogger) Fatal(msg string, attrs ...slog.Attr) {
+func (s *slogger) Fatal(msg string, attrs ...slog.Attr) {
 	s.logAttrs(context.Background(), SlogLevelFatal, msg, attrs)
 }
 
-func (s *Slogger) Child(attrs ...slog.Attr) Logger[slog.Attr, slog.Level] {
+func (s *slogger) Child(attrs ...slog.Attr) Slog {
 	if len(attrs) == 0 {
 		return s
 	}
@@ -74,34 +74,38 @@ func (s *Slogger) Child(attrs ...slog.Attr) Logger[slog.Attr, slog.Level] {
 		args = append(args, attr)
 	}
 
-	return &Slogger{s.logger.With(args...), s.opts, s.name}
+	return &slogger{s.logger.With(args...), s.opts, s.name}
 }
 
-func (s *Slogger) Named(name string) Logger[slog.Attr, slog.Level] {
+func (s *slogger) Named(name string) Slog {
 	if name == "" {
 		return s
 	}
 	if s.name == "" {
-		return &Slogger{s.logger, s.opts, name}
+		return &slogger{s.logger, s.opts, name}
 	}
 
-	return &Slogger{s.logger, s.opts, s.name + "." + name}
+	return &slogger{s.logger, s.opts, s.name + "." + name}
 }
 
-func (s *Slogger) Log(ctx context.Context, level slog.Level, msg string, attrs ...slog.Attr) {
+func (s *slogger) Log(ctx context.Context, level slog.Level, msg string, attrs ...slog.Attr) {
 	s.logAttrs(ctx, level, msg, attrs)
 }
 
-func (s *Slogger) WithGroup(name string) Logger[slog.Attr, slog.Level] {
+func (s *slogger) WithGroup(name string) Slog {
 	if name == "" {
 		return s
 	}
 
-	return &Slogger{s.logger.WithGroup(name), s.opts, s.name}
+	return &slogger{s.logger.WithGroup(name), s.opts, s.name}
+}
+
+func (s *slogger) Enabled(level slog.Level) bool {
+	return s.logger.Enabled(context.Background(), level)
 }
 
 // logAttrs for record callers
-func (s *Slogger) logAttrs(ctx context.Context, level slog.Level, msg string, attrs []slog.Attr) {
+func (s *slogger) logAttrs(ctx context.Context, level slog.Level, msg string, attrs []slog.Attr) {
 	if !s.logger.Enabled(context.Background(), level) {
 		return
 	}

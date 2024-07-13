@@ -3,6 +3,7 @@ package log
 import (
 	"errors"
 	"log/slog"
+	"os"
 	"testing"
 	"time"
 )
@@ -80,10 +81,13 @@ func BenchmarkOriginSlogWithSource(b *testing.B) {
 }
 
 func BenchmarkCustomSlogDisable(b *testing.B) {
-	logger, _ := NewSlog(&mockedBoard{}, &SlogHandlerOptions{Level: slog.LevelError})
+	logger, _ := NewSlog(os.Stdout, &SlogHandlerOptions{
+		Level:     slog.LevelError,
+		AddSource: true,
+	})
 
 	b.ResetTimer()
-	for i := 0; i < 1000000; i++ {
+	for i := 0; i < b.N; i++ {
 		logger.Info("constructed a logger")
 		logger.Info("slog constructed a logger",
 			slog.String("name", "tsingshaner"),
@@ -95,10 +99,13 @@ func BenchmarkCustomSlogDisable(b *testing.B) {
 }
 
 func BenchmarkOriginSlogDisable(b *testing.B) {
-	logger := slog.New(slog.NewJSONHandler(&mockedBoard{}, &slog.HandlerOptions{Level: slog.LevelError}))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level:     slog.LevelError,
+		AddSource: true,
+	}))
 
 	b.ResetTimer()
-	for i := 0; i < 1000000; i++ {
+	for i := 0; i < b.N; i++ {
 		logger.Info("constructed a logger")
 		logger.Info("slog constructed a logger",
 			slog.String("name", "tsingshaner"),

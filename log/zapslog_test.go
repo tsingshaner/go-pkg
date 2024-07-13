@@ -6,24 +6,18 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-type levelEnabled struct {
-	fn      func(string, ...slog.Attr)
-	enabled bool
-}
-
-type levelTestCases struct {
-	level   Level
-	expects []levelEnabled
-}
-
-func TestSlog(t *testing.T) {
+func TestZapSlog(t *testing.T) {
 	board := &mockedBoard{}
-	logger, _ := NewSlog(board, &SlogHandlerOptions{
-		AddSource: false,
-		Level:     SlogLevelAll,
-	})
+	core, _ := NewZapCore(
+		NewZapJSONEncoder(),
+		zapcore.AddSync(board),
+		LevelAll,
+	)
+	logger := NewZapLog(core, zap.AddCaller(), zap.AddCallerSkip(2))
 
 	assert.Implements(t, (*Logger[slog.Attr, slog.Level])(nil), logger)
 
@@ -40,26 +34,26 @@ func TestSlog(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		t.Run(tc.level, func(t *testing.T) {
-			board.Flush()
-			message := fmt.Sprintf("test %s", tc.level)
+		board.Flush()
+		message := fmt.Sprintf("test %s", tc.level)
 
-			tc.logFunc(message)
+		tc.logFunc(message)
 
-			assert.Equal(t, 1, board.Size())
-			assert.Contains(t, string(board.records[0]), fmt.Sprintf("\"msg\":\"%s\"", message))
-			assert.Contains(t, string(board.records[0]), "\"time\":")
-			assert.Contains(t, string(board.records[0]), fmt.Sprintf("\"level\":\"%s\"", tc.level))
-		})
+		assert.Equal(t, 1, board.Size())
+		assert.Contains(t, string(board.records[0]), fmt.Sprintf("\"msg\":\"%s\"", message))
+		assert.Contains(t, string(board.records[0]), "\"time\":")
+		assert.Contains(t, string(board.records[0]), fmt.Sprintf("\"level\":\"%s\"", tc.level))
 	}
 }
 
-func TestSlogLevelToggle(t *testing.T) {
+func TestZapSlogLevelToggle(t *testing.T) {
 	board := &mockedBoard{}
-	logger, levelToggler := NewSlog(board, &SlogHandlerOptions{
-		AddSource: false,
-		Level:     SlogLevelAll,
-	})
+	core, levelToggler := NewZapCore(
+		NewZapJSONEncoder(),
+		zapcore.AddSync(board),
+		LevelInfo|LevelWarn|LevelError|LevelFatal,
+	)
+	logger := NewZapLog(core, zap.AddCaller(), zap.AddCallerSkip(2))
 
 	testCases := []levelTestCases{
 		{
@@ -84,29 +78,51 @@ func TestSlogLevelToggle(t *testing.T) {
 				{logger.Fatal, false},
 			},
 		},
+		{
+			LevelDebug | LevelFatal,
+			[]levelEnabled{
+				{logger.Trace, false},
+				{logger.Debug, true},
+				{logger.Info, false},
+				{logger.Warn, false},
+				{logger.Error, false},
+				{logger.Fatal, true},
+			},
+		},
+		{
+			LevelSilent,
+			[]levelEnabled{
+				{logger.Trace, false},
+				{logger.Debug, false},
+				{logger.Info, false},
+				{logger.Warn, false},
+				{logger.Error, false},
+				{logger.Fatal, false},
+			},
+		},
 	}
 
 	for _, tc := range testCases {
-		t.Run(fmt.Sprintf("level(%d)", tc.level), func(t *testing.T) {
-			levelToggler(tc.level)
+		levelToggler(tc.level)
 
-			for _, e := range tc.expects {
-				board.Flush()
-				e.fn("test level")
+		for _, e := range tc.expects {
+			board.Flush()
+			e.fn("test level")
 
-				assert.Equal(t, e.enabled, board.Size() == 1)
-			}
-		})
-
+			assert.Equal(t, e.enabled, board.Size() == 1)
+		}
 	}
 }
 
-func TestSlogChild(t *testing.T) {
+func TestZapSlogChild(t *testing.T) {
 	board := &mockedBoard{}
-	logger, _ := NewSlog(board, &SlogHandlerOptions{
-		AddSource: false,
-		Level:     SlogLevelAll,
-	})
+	core, _ := NewZapCore(
+		NewZapJSONEncoder(),
+		zapcore.AddSync(board),
+		LevelAll,
+	)
+
+	logger := NewZapLog(core)
 
 	child := logger.Child(slog.Int("pid", 123))
 
@@ -136,12 +152,14 @@ func TestSlogChild(t *testing.T) {
 	assert.NotContains(t, string(board.records[0]), "\"name\":")
 }
 
-func TestSlogGroup(t *testing.T) {
+func TestZapSlogGroup(t *testing.T) {
 	board := &mockedBoard{}
-	logger, _ := NewSlog(board, &SlogHandlerOptions{
-		AddSource: false,
-		Level:     SlogLevelAll,
-	})
+	core, _ := NewZapCore(
+		NewZapJSONEncoder(),
+		zapcore.AddSync(board),
+		LevelInfo|LevelWarn|LevelError|LevelFatal,
+	)
+	logger := NewZapLog(core, zap.AddCaller(), zap.AddCallerSkip(2))
 
 	grouped := logger.WithGroup("obj")
 	grouped.Info("test group", slog.Bool("nested", true))
@@ -168,12 +186,14 @@ func TestSlogGroup(t *testing.T) {
 		"\"obj\":{\"pid\":123,\"obj2\":{\"nested\":true}}")
 }
 
-func TestSlogNamed(t *testing.T) {
+func TestZapSlogNamed(t *testing.T) {
 	board := &mockedBoard{}
-	logger, _ := NewSlog(board, &SlogHandlerOptions{
-		AddSource: false,
-		Level:     SlogLevelAll,
-	})
+	core, _ := NewZapCore(
+		NewZapJSONEncoder(),
+		zapcore.AddSync(board),
+		LevelInfo|LevelWarn|LevelError|LevelFatal,
+	)
+	logger := NewZapLog(core, zap.AddCaller(), zap.AddCallerSkip(2))
 
 	named := logger.Named("app")
 	named.Info("test named", slog.Bool("nested", true))
@@ -201,22 +221,86 @@ func TestSlogNamed(t *testing.T) {
 	assert.Contains(t, string(board.records[0]), "\"name\":\"app\"")
 }
 
-func TestSlogSource(t *testing.T) {
+func TestZapSlogSource(t *testing.T) {
 	board := &mockedBoard{}
-	logger, _ := NewSlog(board, &SlogHandlerOptions{AddSource: true})
+	core, _ := NewZapCore(
+		NewZapJSONEncoder(),
+		zapcore.AddSync(board),
+		LevelInfo|LevelWarn|LevelError|LevelFatal,
+	)
+	logger := NewZapLog(core, zap.AddCaller(), zap.AddCallerSkip(2))
 
 	logger.Info("test source")
 
 	assert.Equal(t, 1, board.Size())
 	assert.Contains(t, string(board.records[0]), "\"msg\":\"test source\"")
-	assert.Contains(t, string(board.records[0]), "\"src\":\"slog_test.go:")
+	assert.Contains(t, string(board.records[0]), "\"log/zapslog_test.go:")
 	assert.Contains(t, string(board.records[0]),
-		" github.com/tsingshaner/go-pkg/log.TestSlogSource\"")
+		"github.com/tsingshaner/go-pkg/log.TestZapSlogSource\"")
 }
 
-func TestSlogSync(t *testing.T) {
+func TestZapSlogStack(t *testing.T) {
+	levelEnabledFn, toggleStackLevel := NewZapLevelFilter(LevelError)
 	board := &mockedBoard{}
-	logger, _ := NewSlog(board, &SlogHandlerOptions{})
+	core, _ := NewZapCore(
+		NewZapJSONEncoder(),
+		zapcore.AddSync(board),
+		LevelAll,
+	)
+	logger := NewZapLog(core, zap.AddCaller(), zap.AddCallerSkip(2), zap.AddStacktrace(levelEnabledFn))
 
+	testCases := []levelTestCases{
+		{
+			LevelTrace | LevelInfo | LevelWarn,
+			[]levelEnabled{
+				{logger.Trace, true},
+				{logger.Debug, false},
+				{logger.Info, true},
+				{logger.Warn, true},
+				{logger.Error, false},
+				{logger.Fatal, false},
+			},
+		},
+		{
+			LevelDebug | LevelWarn | LevelError,
+			[]levelEnabled{
+				{logger.Trace, false},
+				{logger.Debug, true},
+				{logger.Info, false},
+				{logger.Warn, true},
+				{logger.Error, true},
+				{logger.Fatal, false},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		toggleStackLevel(tc.level)
+
+		for _, e := range tc.expects {
+			board.Flush()
+			e.fn("test stack")
+
+			assert.Equal(t, 1, board.Size())
+			if e.enabled {
+				assert.Contains(t, string(board.records[0]),
+					"\"stack\":\"github.com/tsingshaner/go-pkg/log.TestZapSlogStack\\n")
+			} else {
+				assert.NotContains(t, string(board.records[0]), "\"stack\":")
+			}
+		}
+	}
+}
+
+func TestZapSlogSync(t *testing.T) {
+	board := &mockedBoard{}
+	core, _ := NewZapCore(
+		NewZapJSONEncoder(),
+		zapcore.AddSync(board),
+		LevelInfo|LevelWarn|LevelError|LevelFatal,
+	)
+	logger := NewZapLog(core, zap.AddCaller(), zap.AddCallerSkip(2))
+
+	logger.Info("test sync")
 	assert.Nil(t, logger.Sync())
 }

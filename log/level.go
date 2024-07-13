@@ -5,18 +5,19 @@ import (
 	"strconv"
 
 	"go.uber.org/zap/zapcore"
+	"golang.org/x/exp/constraints"
 )
 
 type Level = int8
 type LevelToggler func(Level)
 
 // LogLevel is a wrapper for dynamically changing log level.
-type LogLevel[T ~int | ~int8 | ~int16] struct {
+type LogLevel[T constraints.Signed] struct {
 	value T
 }
 
 const (
-	LevelSilent Level = -1
+	LevelSilent Level = 0
 	LevelTrace  Level = 1 << 0
 	LevelDebug  Level = 1 << 1
 	LevelInfo   Level = 1 << 2

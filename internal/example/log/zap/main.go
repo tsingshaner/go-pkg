@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log/slog"
 	"os"
 
 	"github.com/tsingshaner/go-pkg/log"
@@ -22,7 +23,7 @@ func exampleCustomZap() {
 
 	stackLevelFunc, stackLevelToggler := log.NewZapLevelFilter(log.LevelError | log.LevelFatal)
 
-	logger := log.NewZapLogger(
+	logger := log.NewZapLog(
 		core,
 		zap.AddCaller(),
 		zap.AddCallerSkip(2),
@@ -30,8 +31,8 @@ func exampleCustomZap() {
 	)
 
 	child := logger.Named("custom").Named("zap").Child(
-		zap.String("version", "v1.0.0"),
-		zap.Int("pid", os.Getpid()),
+		slog.String("version", "v1.0.0"),
+		slog.Int("pid", os.Getpid()),
 	)
 
 	logger.Trace("custom zap trace")
@@ -57,7 +58,7 @@ func exampleCustomZap() {
 
 	grouped := logger.WithGroup("group")
 	grouped.Info("custom zap with group")
-	grouped.Info("custom zap with group", zap.String("key", "value"))
+	grouped.Info("custom zap with group", slog.String("key", "value"))
 
 	levelToggler(log.LevelError | log.LevelFatal)
 	namedLogger.Trace("not print")
