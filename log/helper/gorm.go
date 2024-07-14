@@ -69,7 +69,7 @@ func (l *logger) Trace(ctx context.Context, begin time.Time, fc func() (string, 
 		l.logger.Error(err.Error(),
 			slog.String("pos", utils.FileWithLineNum()),
 			slog.String("sql", sql),
-			slog.Float64("elapsed", float64(elapsed.Nanoseconds()/1e6)),
+			slog.Float64("elapsed", float64(elapsed.Nanoseconds())/1e6),
 			slog.Int64("rows", rows),
 		)
 	case elapsed > l.SlowThreshold && l.SlowThreshold != 0 && l.logger.Enabled(log.SlogLevelWarn):
@@ -78,7 +78,7 @@ func (l *logger) Trace(ctx context.Context, begin time.Time, fc func() (string, 
 		l.logger.Warn(fmt.Sprintf("SLOW SQL >= %v", l.SlowThreshold),
 			slog.String("pos", utils.FileWithLineNum()),
 			slog.String("sql", sql),
-			slog.Float64("elapsed", float64(elapsed.Nanoseconds()/1e6)),
+			slog.Float64("elapsed", float64(elapsed.Nanoseconds())/1e6),
 			slog.Int64("rows", rows),
 		)
 	case l.logger.Enabled(log.SlogLevelInfo):
@@ -87,7 +87,7 @@ func (l *logger) Trace(ctx context.Context, begin time.Time, fc func() (string, 
 		l.logger.Info("",
 			slog.String("pos", utils.FileWithLineNum()),
 			slog.String("sql", sql),
-			slog.Float64("elapsed", float64(elapsed.Nanoseconds()/1e6)),
+			slog.Float64("elapsed", float64(elapsed.Nanoseconds())/1e6),
 			slog.Int64("rows", rows),
 		)
 	}

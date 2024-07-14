@@ -67,6 +67,24 @@ func (z *zapLog) Named(name string) Slog {
 	return &zapLog{z.logger.Named(name)}
 }
 
+type zapOpts struct {
+	*ChildLoggerOptions
+}
+
+func (zo *zapOpts) applies() []zap.Option {
+	level, _ := NewZapLevelFilter(zo.StackTrace)
+
+	return []zap.Option{
+		zap.WithCaller(zo.AddSource),
+		zap.AddCallerSkip(zo.SkipCaller),
+		zap.AddStacktrace(level),
+	}
+}
+
+func (z *zapLog) WithOptions(opts *ChildLoggerOptions) Slog {
+	return &zapLog{z.logger.WithOptions((&zapOpts{opts}).applies()...)}
+}
+
 func (z *zapLog) Enabled(level slog.Level) bool {
 	return z.logger.Core().Enabled(zapcore.Level(level))
 }

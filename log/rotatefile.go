@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/gookit/slog/rotatefile"
+	"github.com/tsingshaner/go-pkg/util"
 )
 
 type FileConfig = rotatefile.Config
@@ -18,14 +19,9 @@ func NewFileWriter(fns ...func(*FileConfig)) (*rotatefile.Writer, error) {
 	return c.Create()
 }
 
-func NewFilesClear(ctx context.Context, fns ...func(*FileClearConfig)) *rotatefile.FilesClear {
-	c := rotatefile.NewCConfig()
-	for _, fn := range fns {
-		fn(c)
-	}
-
+func NewFilesClear(ctx context.Context, fns ...util.WithFn[FileClearConfig]) *rotatefile.FilesClear {
 	fc := &rotatefile.FilesClear{}
-	fc.WithConfig(c)
+	fc.WithConfig(util.BuildWithOpts(rotatefile.NewCConfig(), fns...))
 
 	go fc.DaemonClean(func() {})
 	go func() {

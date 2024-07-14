@@ -21,8 +21,7 @@ type levelTestCases struct {
 func TestSlog(t *testing.T) {
 	board := &mockedBoard{}
 	logger, _ := NewSlog(board, &SlogHandlerOptions{
-		AddSource: false,
-		Level:     SlogLevelAll,
+		Level: SlogLevelAll,
 	})
 
 	assert.Implements(t, (*Logger[slog.Attr, slog.Level])(nil), logger)
@@ -57,8 +56,7 @@ func TestSlog(t *testing.T) {
 func TestSlogLevelToggle(t *testing.T) {
 	board := &mockedBoard{}
 	logger, levelToggler := NewSlog(board, &SlogHandlerOptions{
-		AddSource: false,
-		Level:     SlogLevelAll,
+		Level: SlogLevelAll,
 	})
 
 	testCases := []levelTestCases{
@@ -104,8 +102,7 @@ func TestSlogLevelToggle(t *testing.T) {
 func TestSlogChild(t *testing.T) {
 	board := &mockedBoard{}
 	logger, _ := NewSlog(board, &SlogHandlerOptions{
-		AddSource: false,
-		Level:     SlogLevelAll,
+		Level: SlogLevelAll,
 	})
 
 	child := logger.Child(slog.Int("pid", 123))
@@ -139,8 +136,7 @@ func TestSlogChild(t *testing.T) {
 func TestSlogGroup(t *testing.T) {
 	board := &mockedBoard{}
 	logger, _ := NewSlog(board, &SlogHandlerOptions{
-		AddSource: false,
-		Level:     SlogLevelAll,
+		Level: SlogLevelAll,
 	})
 
 	grouped := logger.WithGroup("obj")
@@ -171,8 +167,7 @@ func TestSlogGroup(t *testing.T) {
 func TestSlogNamed(t *testing.T) {
 	board := &mockedBoard{}
 	logger, _ := NewSlog(board, &SlogHandlerOptions{
-		AddSource: false,
-		Level:     SlogLevelAll,
+		Level: SlogLevelAll,
 	})
 
 	named := logger.Named("app")
@@ -203,7 +198,9 @@ func TestSlogNamed(t *testing.T) {
 
 func TestSlogSource(t *testing.T) {
 	board := &mockedBoard{}
-	logger, _ := NewSlog(board, &SlogHandlerOptions{AddSource: true})
+	logger, _ := NewSlog(board, &SlogHandlerOptions{}, func(o *Options) {
+		o.AddSource = true
+	})
 
 	logger.Info("test source")
 
@@ -219,4 +216,46 @@ func TestSlogSync(t *testing.T) {
 	logger, _ := NewSlog(board, &SlogHandlerOptions{})
 
 	assert.Nil(t, logger.Sync())
+}
+
+func TestSlogChildWithOptions(t *testing.T) {
+	board := &mockedBoard{}
+	logger, _ := NewSlog(board, &SlogHandlerOptions{}, func(o *Options) {
+		o.AddSource = true
+	})
+
+	child := logger.WithOptions(&ChildLoggerOptions{
+		AddSource:  false,
+		SkipCaller: 0,
+		StackTrace: LevelError,
+	})
+
+	logger.Info("parent info")
+	assert.Equal(t, 1, board.Size())
+	assert.Contains(t, string(board.records[0]), "\"src\":\"")
+
+	board.Flush()
+	child.Info("child info")
+
+	assert.Equal(t, 1, board.Size())
+	assert.NotContains(t, string(board.records[0]), "\"src\":\"")
+
+	child = logger.WithOptions(&ChildLoggerOptions{
+		AddSource:  false,
+		SkipCaller: 0,
+		StackTrace: LevelInfo,
+	})
+
+	board.Flush()
+	logger.Info("parent info without stack")
+
+	assert.Equal(t, 1, board.Size())
+	assert.NotContains(t, string(board.records[0]), "\"stack\":\"")
+
+	board.Flush()
+	child.Info("child info with stack")
+
+	assert.Equal(t, 1, board.Size())
+	assert.Contains(t, string(board.records[0]), "\"stack\":\"")
+	assert.NotContains(t, string(board.records[0]), "\"src\":\"")
 }

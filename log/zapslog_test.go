@@ -304,3 +304,41 @@ func TestZapSlogSync(t *testing.T) {
 	logger.Info("test sync")
 	assert.Nil(t, logger.Sync())
 }
+
+func TestZapSlogChildWithOptions(t *testing.T) {
+	board := &mockedBoard{}
+	core, _ := NewZapCore(
+		NewZapJSONEncoder(),
+		zapcore.AddSync(board),
+		LevelInfo|LevelWarn|LevelError|LevelFatal,
+	)
+	logger := NewZapLog(core, zap.AddCaller(), zap.AddCallerSkip(2))
+
+	child := logger.WithOptions(&ChildLoggerOptions{
+		AddSource:  false,
+		SkipCaller: 1,
+		StackTrace: LevelError,
+	})
+
+	logger.Info("parent info")
+	child.Info("child info")
+
+	assert.Equal(t, 2, board.Size())
+	assert.Contains(t, string(board.records[0]), "\"src\":\"")
+	assert.NotContains(t, string(board.records[1]), "\"src\":\"")
+
+	board.Flush()
+	child = logger.WithOptions(&ChildLoggerOptions{
+		AddSource:  false,
+		SkipCaller: 1,
+		StackTrace: LevelInfo,
+	})
+
+	logger.Info("parent error")
+	child.Info("child error")
+
+	assert.Equal(t, 2, board.Size())
+	assert.NotContains(t, string(board.records[0]), "\"stack\":\"")
+	assert.Contains(t, string(board.records[1]), "\"stack\":\"")
+	assert.NotContains(t, string(board.records[1]), "\"src\":\"")
+}

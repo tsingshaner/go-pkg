@@ -2,10 +2,8 @@ package log
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log/slog"
-	"path/filepath"
 )
 
 type SlogHandler struct {
@@ -13,31 +11,22 @@ type SlogHandler struct {
 	Level   *LogLevel[slog.Level]
 }
 
-type SlogHandlerOptions = slog.HandlerOptions
+type SlogHandlerOptions struct {
+	// ReplaceAttr see slog.HandlerOptions.ReplaceAttr
+	ReplaceAttr func(groups []string, a slog.Attr) slog.Attr
+	// Level see slog.HandlerOptions.Level
+	Level slog.Leveler
+}
+
+// slog.HandlerOptions
 
 func NewSlogHandler(w io.Writer, opts *SlogHandlerOptions) (slog.Handler, LevelToggler) {
 	if opts.ReplaceAttr == nil {
-		if opts.AddSource {
-			opts.ReplaceAttr = func(groups []string, a slog.Attr) slog.Attr {
-				if a.Key == slog.SourceKey {
-					a.Key = "src"
-					source := a.Value.Any().(*slog.Source)
-					source.File = filepath.Base(source.File)
-					a.Value = slog.StringValue(fmt.Sprintf("%s:%d %s", source.File, source.Line, source.Function))
-				}
-
-				if a.Key == slog.LevelKey {
-					a.Value = SlogLevelEncoder(a.Value.Any().(slog.Level))
-				}
-				return a
+		opts.ReplaceAttr = func(groups []string, a slog.Attr) slog.Attr {
+			if a.Key == slog.LevelKey {
+				a.Value = SlogLevelEncoder(a.Value.Any().(slog.Level))
 			}
-		} else {
-			opts.ReplaceAttr = func(groups []string, a slog.Attr) slog.Attr {
-				if a.Key == slog.LevelKey {
-					a.Value = SlogLevelEncoder(a.Value.Any().(slog.Level))
-				}
-				return a
-			}
+			return a
 		}
 	}
 
@@ -47,9 +36,13 @@ func NewSlogHandler(w io.Writer, opts *SlogHandlerOptions) (slog.Handler, LevelT
 
 	level := &LogLevel[slog.Level]{opts.Level.Level()}
 
-	return &SlogHandler{slog.NewJSONHandler(w, opts), level}, func(l Level) {
-		level.value = slog.Level(l)
-	}
+	return &SlogHandler{slog.NewJSONHandler(w, &slog.HandlerOptions{
+			AddSource:   false,
+			ReplaceAttr: opts.ReplaceAttr,
+			Level:       opts.Level,
+		}), level}, func(l Level) {
+			level.value = slog.Level(l)
+		}
 }
 
 func (sh *SlogHandler) Handle(ctx context.Context, r slog.Record) error {

@@ -29,8 +29,9 @@ func createWriter() io.Writer {
 
 func exampleCustomSlog(w io.Writer) {
 	logger, levelToggler := log.NewSlog(w, &log.SlogHandlerOptions{
-		Level:     slog.Level(log.LevelAll),
-		AddSource: true,
+		Level: slog.Level(log.LevelAll),
+	}, func(o *log.Options) {
+		o.AddSource = true
 	})
 
 	child := logger.Named("custom").Named("slog").Child(
@@ -69,4 +70,15 @@ func exampleCustomSlog(w io.Writer) {
 	grouped.Warn("not print")
 	grouped.Error("error print")
 	grouped.Fatal("fatal print", slog.String("key", "value"))
+
+	childWithStack := grouped.WithOptions(&log.ChildLoggerOptions{
+		AddSource:  true,
+		StackTrace: log.LevelError | log.LevelFatal,
+	})
+
+	childWithStack.Debug("not print")
+	childWithStack.Info("not print")
+	childWithStack.Warn("not print")
+	childWithStack.Error("error print")
+	childWithStack.Fatal("fatal print", slog.String("key", "value"))
 }

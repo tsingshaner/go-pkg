@@ -27,12 +27,15 @@
 		"GOCOVERDIR",
 		"gomod",
 		"gookit",
+		"gorm",
 		"prettylog",
 		"rotatefile",
 		"stretchr",
 		"Syncer",
 		"taskfile",
+		"testdata",
 		"textfmt",
-		"tsingshaner"
+		"tsingshaner",
+		"zapslog"
 	]
 }

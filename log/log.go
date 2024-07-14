@@ -12,6 +12,15 @@ type Attr interface {
 	slog.Attr | zap.Field
 }
 
+type ChildLoggerOptions struct {
+	// all support
+	AddSource bool
+	// all support
+	SkipCaller int
+	// only zap support
+	StackTrace Level
+}
+
 type LoggerFeature[T Attr, Level constraints.Signed] interface {
 	// Child
 	// - [zh] 创建一个新的记录器，均附带指定的属性。
@@ -26,6 +35,10 @@ type LoggerFeature[T Attr, Level constraints.Signed] interface {
 	// - [zh] 创建子 logger, 之后的属性添加到 name 字段下。
 	// - [en] create a child logger, the following attributes are added to the name field.
 	WithGroup(name string) Logger[T, Level]
+	// WithOptions
+	// - [zh] 创建子 logger, 可独立修改 source 等信息, 部分支持
+	// - [en] create a child logger, you can independently modify source and other information, partially supported
+	WithOptions(*ChildLoggerOptions) Logger[T, Level]
 	// Sync only for zap if you used
 	// see [zap.Logger.Sync](https://pkg.go.dev/go.uber.org/zap#Logger.Sync)
 	Sync() error

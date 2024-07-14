@@ -2,12 +2,14 @@ package log
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log/slog"
-	"runtime"
+	"path/filepath"
 	"time"
 
 	"github.com/tsingshaner/go-pkg/util"
+	"github.com/tsingshaner/go-pkg/util/runtime"
 )
 
 type slogger struct {
@@ -17,9 +19,12 @@ type slogger struct {
 }
 
 type Options struct {
-	addSource bool
+	// AddSource is whether to add source code information to the log, key is 'src'.
+	AddSource bool
 	// SkipCaller is the number of stack frames to skip to find the caller.
 	SkipCaller int
+	// StackTrace is the level of enable stack trace to log.
+	StackTrace slog.Level
 }
 
 // NewSlog base on go std lib log/slog
@@ -28,10 +33,7 @@ func NewSlog(
 	slogOpts *SlogHandlerOptions,
 	fns ...util.WithFn[Options],
 ) (Logger[slog.Attr, slog.Level], LevelToggler) {
-	loggerOpts := util.BuildWithOpts(&Options{
-		addSource:  slogOpts.AddSource,
-		SkipCaller: 0,
-	}, fns...)
+	loggerOpts := util.BuildWithOpts(&Options{false, 0, slog.Level(LevelSilent)}, fns...)
 
 	handler, levelToggler := NewSlogHandler(w, slogOpts)
 
@@ -77,6 +79,14 @@ func (s *slogger) Child(attrs ...slog.Attr) Slog {
 	return &slogger{s.logger.With(args...), s.opts, s.name}
 }
 
+func (s *slogger) WithOptions(opts *ChildLoggerOptions) Slog {
+	return &slogger{
+		s.logger,
+		&Options{opts.AddSource, s.opts.SkipCaller + opts.SkipCaller, slog.Level(opts.StackTrace)},
+		s.name,
+	}
+}
+
 func (s *slogger) Named(name string) Slog {
 	if name == "" {
 		return s
@@ -110,18 +120,21 @@ func (s *slogger) logAttrs(ctx context.Context, level slog.Level, msg string, at
 		return
 	}
 	var pc uintptr
-	if s.opts.addSource {
-		var pcs [1]uintptr
-		// skip [
-		//   runtime.Callers,
-		//   this function,
-		//   this file.Log | LeveledLog,
-		//   (this file.Log | LeveledLog)'s caller,
-		// ]
-		runtime.Callers(s.opts.SkipCaller+3, pcs[:])
-		pc = pcs[0]
-	}
 	r := slog.NewRecord(time.Now(), level, msg, pc)
+
+	addStack := (s.opts.StackTrace & level) == level
+	if s.opts.AddSource || addStack {
+		caller, stack, _ := runtime.GetStackTrace(s.opts.AddSource, addStack, s.opts.SkipCaller+2)
+
+		if s.opts.AddSource {
+			r.AddAttrs(slog.String("src", fmt.Sprintf("%s:%d %s",
+				filepath.Base(caller.File), caller.Line, caller.Function)))
+		}
+
+		if addStack {
+			r.AddAttrs(slog.String("stack", stack))
+		}
+	}
 
 	if s.name != "" {
 		r.AddAttrs(slog.String("name", s.name))

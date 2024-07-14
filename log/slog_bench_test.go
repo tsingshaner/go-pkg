@@ -45,7 +45,9 @@ func BenchmarkOriginSlog(b *testing.B) {
 }
 
 func BenchmarkCustomSlogWithSource(b *testing.B) {
-	logger, _ := NewSlog(&mockedBoard{}, &SlogHandlerOptions{AddSource: true})
+	logger, _ := NewSlog(&mockedBoard{}, &SlogHandlerOptions{}, func(o *Options) {
+		o.AddSource = true
+	})
 	child := logger.Child(slog.Int("pid", 111))
 
 	b.ResetTimer()
@@ -82,8 +84,9 @@ func BenchmarkOriginSlogWithSource(b *testing.B) {
 
 func BenchmarkCustomSlogDisable(b *testing.B) {
 	logger, _ := NewSlog(os.Stdout, &SlogHandlerOptions{
-		Level:     slog.LevelError,
-		AddSource: true,
+		Level: slog.LevelError,
+	}, func(o *Options) {
+		o.AddSource = true
 	})
 
 	b.ResetTimer()
