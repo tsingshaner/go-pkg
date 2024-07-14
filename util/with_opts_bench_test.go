@@ -36,6 +36,15 @@ func BenchmarkInline(b *testing.B) {
 		withC(true)(opts)
 	}
 }
+func BenchmarkDirect(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		opts := &options{}
+		for _, fn := range []WithFn[options]{withA(1), withB("hello"), withC(true)} {
+			fn(opts)
+		}
+	}
+}
 
 // 38383417                33.74 ns/op           32 B/op          1 allocs/op
 func BenchmarkApplyOpts(b *testing.B) {
@@ -43,6 +52,9 @@ func BenchmarkApplyOpts(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		opts := &options{}
 		ApplyOpts(opts, withA(1), withB("hello"), withC(true))
+		if opts.A != 1 {
+			panic("opts error")
+		}
 	}
 }
 
