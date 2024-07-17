@@ -6,4 +6,4 @@ env:
   GOPROXY: https://goproxy.cn,direct
 
 tasks:
-  default: task --list-all
+  default: go run ./cmd/prettylog/main.go

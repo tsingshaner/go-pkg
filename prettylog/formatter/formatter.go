@@ -8,7 +8,12 @@ import (
 	"github.com/tsingshaner/go-pkg/log/helper"
 )
 
-type Data map[string]any
+type Data = map[string]any
+
+type Group struct {
+	Key   string
+	Value Data
+}
 
 type Log interface {
 	Name() string
@@ -18,8 +23,8 @@ type Log interface {
 	Pid() int
 	Src() string
 	Err() string
-	Data() Data
 	Stack() string
+	Groups() []Group
 }
 
 var propertyPrefix = color.Bold(color.UnsafeDim("    » "))
@@ -28,6 +33,8 @@ func Formatter(log Log) string {
 	switch {
 	case strings.HasSuffix(log.Name(), helper.NameGinRouterLoggerSuffix):
 		return FormatGinRouter(log)
+	case strings.HasSuffix(log.Name(), helper.NameGORMLoggerSuffix):
+		return FormatGorm(log)
 	}
 
 	sb := strings.Builder{}
@@ -59,10 +66,15 @@ func Formatter(log Log) string {
 		sb.WriteString(color.UnsafeItalic(log.Src()))
 	}
 
-	if len(log.Data()) > 0 {
+	if len(log.Groups()) > 0 {
 		sb.WriteByte('\n')
-		sb.WriteString(Map(log.Data(), propertyPrefix, "ctx", 2).String())
+		sb.WriteString(Groups(log.Groups(), propertyPrefix, "ctx").String())
 	}
+
+	// if len(log.Data()) > 0 {
+	// 	sb.WriteByte('\n')
+	// 	sb.WriteString(Map(log.Data(), propertyPrefix, "ctx", 2).String())
+	// }
 	sb.WriteByte('\n')
 
 	if log.Stack() != "" {

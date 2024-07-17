@@ -24,7 +24,7 @@ func JSONReader(fns ...util.WithFn[ReaderOptions]) {
 	}
 	if opts.ErrorHandler == nil {
 		opts.ErrorHandler = func(log []byte, _ error) {
-			fmt.Println(log)
+			fmt.Println(string(log))
 		}
 	}
 

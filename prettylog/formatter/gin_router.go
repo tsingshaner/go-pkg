@@ -9,18 +9,19 @@ import (
 
 func FormatGinRouter(log Log) string {
 	sb := &strings.Builder{}
+	g := getLastGroup(log)
 
-	if method, ok := log.Data()["method"].(string); ok {
+	if method, ok := g.Value["method"].(string); ok {
 		sb.WriteString(formatMethod(method))
 		sb.WriteByte(' ')
 	}
 
-	if path, ok := log.Data()["path"].(string); ok {
+	if path, ok := g.Value["path"].(string); ok {
 		sb.WriteString(formatPath(path))
 		sb.WriteByte(' ')
 	}
 
-	if layers, ok := log.Data()["layers"].(float64); ok {
+	if layers, ok := g.Value["layers"].(float64); ok {
 		sb.WriteString(color.UnsafeGray("--{"))
 		sb.WriteString(color.UnsafeCyan(fmt.Sprintf("%d", int(layers))))
 		sb.WriteString(color.UnsafeGray("}-> "))

@@ -7,61 +7,63 @@ import (
 )
 
 type defaultLog struct {
-	name  string
-	level string
-	time  time.Time
-	msg   string
-	pid   int
-	src   string
-	err   string
-	stack string
-	data  formatter.Data
+	name   string
+	level  string
+	time   time.Time
+	msg    string
+	pid    int
+	src    string
+	err    string
+	stack  string
+	groups []formatter.Group
 }
 
 func DefaultAdaptor(data formatter.Data, _ []byte) formatter.Log {
-	l := &defaultLog{data: data}
+	l := &defaultLog{groups: parseGroups("", data)}
 
-	if level, ok := data["level"].(string); ok {
-		l.level = level
-		delete(l.data, "level")
-	}
-
-	if name, ok := data["name"].(string); ok {
-		l.name = name
-		delete(l.data, "name")
-	}
-
-	if ts, ok := data["time"].(string); ok {
-		if date, err := time.Parse(time.RFC3339Nano, ts); err == nil {
-			l.time = date
-			delete(l.data, "time")
+	for _, group := range l.groups {
+		if level, ok := group.Value["level"].(string); ok {
+			l.level = level
+			delete(group.Value, "level")
 		}
-	}
 
-	if msg, ok := data["msg"].(string); ok {
-		l.msg = msg
-		delete(l.data, "msg")
-	}
+		if name, ok := group.Value["name"].(string); ok {
+			l.name = name
+			delete(group.Value, "name")
+		}
 
-	if pid, ok := data["pid"].(float64); ok {
-		l.pid = int(pid)
-		delete(l.data, "pid")
-	}
+		if ts, ok := group.Value["time"].(string); ok {
+			if date, err := time.Parse(time.RFC3339Nano, ts); err == nil {
+				l.time = date
+				delete(group.Value, "time")
+			}
+		}
 
-	if src, ok := data["src"].(string); ok {
-		l.src = src
+		if msg, ok := group.Value["msg"].(string); ok {
+			l.msg = msg
+			delete(group.Value, "msg")
+		}
 
-		delete(l.data, "src")
-	}
+		if pid, ok := group.Value["pid"].(float64); ok {
+			l.pid = int(pid)
+			delete(group.Value, "pid")
+		}
 
-	if err, ok := data["err"].(string); ok {
-		l.err = err
-		delete(l.data, "err")
-	}
+		if src, ok := group.Value["src"].(string); ok {
+			l.src = src
 
-	if stack, ok := data["stack"].(string); ok {
-		l.stack = stack
-		delete(l.data, "stack")
+			delete(group.Value, "src")
+		}
+
+		if err, ok := group.Value["err"].(string); ok {
+			l.err = err
+			delete(group.Value, "err")
+		}
+
+		if stack, ok := group.Value["stack"].(string); ok {
+			l.stack = stack
+			delete(group.Value, "stack")
+		}
 	}
 
 	return l
@@ -99,6 +101,22 @@ func (dl *defaultLog) Stack() string {
 	return dl.stack
 }
 
-func (dl *defaultLog) Data() formatter.Data {
-	return dl.data
+func (dl *defaultLog) Groups() []formatter.Group {
+	return dl.groups
+}
+
+func parseGroups(name string, data formatter.Data) []formatter.Group {
+	groups := []formatter.Group{
+		{Key: name, Value: data},
+	}
+
+	for k, v := range data {
+		if sub, ok := v.(formatter.Data); ok {
+			delete(data, k)
+			groups = append(groups, parseGroups(k, sub)...)
+			break
+		}
+	}
+
+	return groups
 }
