@@ -20,6 +20,7 @@
 	},
 	"cSpell.words": [
 		"allocs",
+		"bitmask",
 		"bytedance",
 		"covdata",
 		"covermode",
@@ -29,6 +30,7 @@
 		"gookit",
 		"gorm",
 		"prettylog",
+		"primarykey",
 		"rotatefile",
 		"stretchr",
 		"Syncer",
@@ -36,6 +38,7 @@
 		"testdata",
 		"textfmt",
 		"tsingshaner",
+		"varchar",
 		"zapslog"
 	]
 }
