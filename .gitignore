@@ -3,9 +3,11 @@
 .vscode/*
 !.vscode/settings.json
 
+bin
+coverage
+dist
 target
 logs
-coverage
 
 *.log
 *.db

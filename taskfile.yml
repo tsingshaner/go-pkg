@@ -25,6 +25,10 @@ includes:
     dir: ./oss
     taskfile: ./oss/taskfile.yml
 
+  prettylog:
+    dir: ./prettylog
+    taskfile: ./prettylog/taskfile.yml
+
   _:
     dir: ./internal
     taskfile: ./internal/taskfile.yml
