@@ -48,5 +48,9 @@ func cleanGroup(groups []Group) []Group {
 		return len(g.Value) > 0
 	})
 
+	if lastEmptyGroupIndex == -1 {
+		return nil
+	}
+
 	return groups[:lastEmptyGroupIndex+1]
 }

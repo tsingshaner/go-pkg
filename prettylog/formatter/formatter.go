@@ -70,10 +70,6 @@ func Formatter(log Log) string {
 		sb.WriteString(Groups(log.Groups(), propertyPrefix, "ctx").String())
 	}
 
-	// if len(log.Data()) > 0 {
-	// 	sb.WriteByte('\n')
-	// 	sb.WriteString(Map(log.Data(), propertyPrefix, "ctx", 2).String())
-	// }
 	sb.WriteByte('\n')
 
 	if log.Stack() != "" {
