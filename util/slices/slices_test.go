@@ -76,3 +76,28 @@ func TestMapStruct(t *testing.T) {
 	assert.Contains(t, r, "name: Bob, age: 22")
 	assert.Contains(t, r, "name: Cathy, age: 24")
 }
+
+func TestLastIndex(t *testing.T) {
+	s := []int{1, 3, 3, 4, 5}
+	assert.Equal(t, 3, LastIndex(s, 4))
+	assert.Equal(t, -1, LastIndex(s, 6))
+}
+
+func TestLastIndexFunc(t *testing.T) {
+	type user struct {
+		Name string
+		Age  int
+	}
+
+	s := []user{
+		{Name: "Bob", Age: 22},
+		{Name: "Bob", Age: 22},
+		{Name: "Cathy", Age: 24},
+	}
+	f := func(u user) bool {
+		return u.Age > 21
+	}
+
+	assert.Equal(t, 2, LastIndexFunc(s, f))
+	assert.Equal(t, -1, LastIndexFunc(s, func(u user) bool { return u.Age > 25 }))
+}

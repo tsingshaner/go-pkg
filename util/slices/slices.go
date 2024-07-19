@@ -19,3 +19,29 @@ func Map[T, R any](s []T, f func(T) R) []R {
 
 	return r
 }
+
+// LastIndex returns the index of the last occurrence of the specified value in the slice,
+// or -1 if the value is not present in the slice.
+func LastIndex[T comparable](s []T, want T) int {
+	i := len(s) - 1
+	for ; i >= 0; i-- {
+		if s[i] == want {
+			return i
+		}
+	}
+
+	return i
+}
+
+// LastIndex returns the index of the last occurrence of the specified value in the slice,
+// or -1 if the value is not present in the slice.
+func LastIndexFunc[T any](s []T, checker func(item T) bool) int {
+	i := len(s) - 1
+	for ; i >= 0; i-- {
+		if checker(s[i]) {
+			return i
+		}
+	}
+
+	return i
+}
