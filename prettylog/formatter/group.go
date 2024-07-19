@@ -4,10 +4,17 @@ import (
 	"strings"
 
 	"github.com/tsingshaner/go-pkg/color"
+	"github.com/tsingshaner/go-pkg/util/slices"
 )
 
 func Groups(groups []Group, prefix, mapKey string) *strings.Builder {
 	sb := &strings.Builder{}
+	groups = cleanGroup(groups)
+	if len(groups) == 0 {
+		return sb
+	}
+
+	sb.WriteByte('\n')
 	sb.WriteString(prefix)
 	sb.WriteString(color.UnsafeBold(color.UnsafeBlue(mapKey)))
 
@@ -34,4 +41,12 @@ func Groups(groups []Group, prefix, mapKey string) *strings.Builder {
 	}
 
 	return sb
+}
+
+func cleanGroup(groups []Group) []Group {
+	lastEmptyGroupIndex := slices.LastIndexFunc(groups, func(g Group) bool {
+		return len(g.Value) > 0
+	})
+
+	return groups[:lastEmptyGroupIndex+1]
 }

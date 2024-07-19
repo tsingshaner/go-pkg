@@ -67,7 +67,6 @@ func Formatter(log Log) string {
 	}
 
 	if len(log.Groups()) > 0 {
-		sb.WriteByte('\n')
 		sb.WriteString(Groups(log.Groups(), propertyPrefix, "ctx").String())
 	}
 
