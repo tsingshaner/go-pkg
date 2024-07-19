@@ -25,6 +25,7 @@
 		"covdata",
 		"covermode",
 		"coverprofile",
+		"fsnotify",
 		"GOCOVERDIR",
 		"gomod",
 		"gookit",

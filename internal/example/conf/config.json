@@ -1,0 +1,16 @@
+{
+  "level": ["info", "error"],
+  "ptr": 1,
+  "nest": {
+    "key": "nest"
+  },
+  "nestPtr": {
+    "key": "nestPtr",
+    "sub": {
+      "key": "nest"
+    },
+    "subPtr": {
+      "key": "nest"
+    }
+  }
+}

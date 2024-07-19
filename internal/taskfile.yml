@@ -9,24 +9,31 @@ vars:
   MOD_DIRS: [color, log/slog, log/zap]
 
 env:
+  FORCE_COLOR: 1
   GO111MODULE: on
   GOPROXY: https://goproxy.cn,direct
 
 tasks:
-  example:color: go run ./example/color/main.go
+  example:color: go run ./example/color/main.go | task prettylog
 
   example:log:slog: go run ./example/log/slog/main.go
 
   example:log:zap: go run ./example/log/zap/main.go
+
+  example:log:gorm: go run ./example/log/gorm/main.go | task prettylog
+
+  example:conf: go run ./example/conf/main.go --config example/conf/config.json
 
   example:prettylog:
     cmds:
       - task example:log:slog | go run ../prettylog/cmd/prettylog/main.go
       - task example:log:zap | go run ../prettylog/cmd/prettylog/main.go
 
-  example:prettylog:gin: cat testdata/gin_router.logs | go run ../prettylog/cmd/prettylog/main.go
+  example:prettylog:gin: cat testdata/gin_router.logs | task prettylog
 
-  example:prettylog:gorm: cat testdata/gorm.logs | go run ../prettylog/cmd/prettylog/main.go
+  example:prettylog:gorm: cat testdata/gorm.logs | task prettylog
+
+  prettylog: go run ../prettylog/cmd/prettylog/main.go
 
   integration:
     desc: run all integration tests
