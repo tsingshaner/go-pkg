@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=../../../errors/gen/v0.schema.json
+
+file: errs_gen.go
+pkg: errs
+modCode: M0
+
+basic:
+  "00":
+    key: DatabaseConnect
+    msg: Database connect error
+
+  "01":
+    key: DatabaseQuery
+    msg: Database query error
+
+rest:
+  NotFound:
+    "00":
+      key: User
+      msg: User Not found
+
+    "02":
+      key: NotFound
+      msg: User Not found
+
+  OK:
+    "00":
+      key: Login
+      msg: 登录成功
+
+    "01":
+      key: Register
+      msg: 注册成功

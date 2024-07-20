@@ -8,6 +8,6 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[{*.{go,sh,ps1},go.{sum,mod,work}}]
+[{*.{go,sh,ps1},go.{sum,mod,work},*.go.template}]
 indent_style = tab
 indent_size = 4

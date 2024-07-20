@@ -24,6 +24,8 @@ tasks:
 
   example:conf: go run ./example/conf/main.go --config example/conf/config.json
 
+  example:errors:gen: go generate ./example/errors
+
   example:prettylog:
     cmds:
       - task example:log:slog | go run ../prettylog/cmd/prettylog/main.go

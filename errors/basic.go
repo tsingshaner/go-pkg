@@ -1,34 +1,40 @@
 package errors
 
-type basicError struct {
-	msg  string
-	code int
+import "golang.org/x/exp/constraints"
+
+type Coder interface {
+	constraints.Integer | string
 }
 
-type BasicError interface {
+type basicError[T Coder] struct {
+	msg  string
+	code T
+}
+
+type BasicError[T Coder] interface {
 	error
 	Is(error) bool
-	Code() int
+	Code() T
 }
 
-var _ BasicError = &basicError{}
+var _ BasicError[string] = &basicError[string]{"", ""}
 
-func (e *basicError) Error() string {
+func (e *basicError[T]) Error() string {
 	return e.msg
 }
 
-func (e *basicError) Code() int {
+func (e *basicError[T]) Code() T {
 	return e.code
 }
 
-func (e *basicError) Is(target error) bool {
-	if targetErr, ok := target.(BasicError); ok {
-		return targetErr.Code() == e.code
+func (e *basicError[T]) Is(target error) bool {
+	if targetErr, ok := target.(BasicError[T]); ok {
+		return targetErr == e
 	}
 
 	return false
 }
 
-func NewBasic(code int, msg string) error {
-	return &basicError{msg, code}
+func NewBasic[T Coder](code T, msg string) error {
+	return &basicError[T]{msg, code}
 }

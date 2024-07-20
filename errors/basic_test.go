@@ -13,19 +13,20 @@ func TestBasicError(t *testing.T) {
 
 	t.Run("error", func(t *testing.T) {
 		assert.Implements(t, (*error)(nil), baseErr)
-		assert.Implements(t, (*BasicError)(nil), baseErr)
+		assert.Implements(t, (*BasicError[int])(nil), baseErr)
 		assert.Equal(t, baseErr.Error(), "base error")
-		assert.Equal(t, baseErr.(BasicError).Code(), 1)
+		assert.Equal(t, baseErr.(BasicError[int]).Code(), 1)
 	})
 
 	t.Run("is", func(t *testing.T) {
-		assert.True(t, errors.Is(baseErr, NewBasic(1, "base error")))
+		assert.True(t, errors.Is(baseErr, baseErr))
+		assert.False(t, errors.Is(baseErr, NewBasic(1, "base error")))
 		assert.False(t, errors.Is(baseErr, NewBasic(2, "base error")))
 		assert.False(t, errors.Is(baseErr, errors.New("base error")))
 	})
 
 	t.Run("as", func(t *testing.T) {
-		var target BasicError
+		var target BasicError[int]
 		assert.True(t, errors.As(baseErr, &target))
 		assert.Equal(t, target.Code(), 1)
 	})
@@ -35,7 +36,7 @@ func TestBasicError(t *testing.T) {
 		assert.True(t, errors.Is(wrapErr, baseErr))
 		assert.Equal(t, wrapErr.Error(), "wrapped error: base error")
 
-		var target BasicError
+		var target BasicError[int]
 		assert.True(t, errors.As(wrapErr, &target))
 		assert.Equal(t, target.Code(), 1)
 	})
@@ -47,7 +48,7 @@ func TestBasicError(t *testing.T) {
 		assert.True(t, errors.Is(wrapErr2, wrapErr1))
 		assert.Equal(t, wrapErr2.Error(), "wrapped error2: wrapped error1: base error")
 
-		var target BasicError
+		var target BasicError[int]
 		assert.True(t, errors.As(wrapErr2, &target))
 		assert.Equal(t, target.Code(), 1)
 	})

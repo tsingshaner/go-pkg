@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Server app YAML Schema",
+  "description": "Schema for server configuration file",
+  "required": ["file", "pkg", "modCode", "basic", "rest"],
+  "properties": {
+    "file": {
+      "type": "string",
+      "pattern": ".go$",
+      "description": "the file name of generate go file"
+    },
+    "pkg": {
+      "type": "string",
+      "description": "the package name of generate go file"
+    },
+    "modCode": {
+      "description": "base error code, all error codes will be calculated as baseCode + error code",
+      "type": "string",
+      "pattern": "^[0-9A-Z]{2}$"
+    },
+    "basic": {
+      "$ref": "#/definitions/errors"
+    },
+    "rest": {
+      "type": "object",
+      "propertyNames": {
+        "enum": [
+          "Continue",
+          "SwitchingProtocols",
+          "Processing",
+          "EarlyHints",
+          "OK",
+          "Created",
+          "Accepted",
+          "NonAuthoritativeInfo",
+          "NoContent",
+          "ResetContent",
+          "PartialContent",
+          "MultiStatus",
+          "AlreadyReported",
+          "IMUsed",
+          "MultipleChoices",
+          "MovedPermanently",
+          "Found",
+          "SeeOther",
+          "NotModified",
+          "UseProxy",
+          "TemporaryRedirect",
+          "PermanentRedirect",
+          "BadRequest",
+          "Unauthorized",
+          "PaymentRequired",
+          "Forbidden",
+          "NotFound",
+          "MethodNotAllowed",
+          "NotAcceptable",
+          "ProxyAuthRequired",
+          "RequestTimeout",
+          "Conflict",
+          "Gone",
+          "LengthRequired",
+          "PreconditionFailed",
+          "RequestEntityTooLarge",
+          "RequestURITooLong",
+          "UnsupportedMediaType",
+          "RequestedRangeNotSatisfiable",
+          "ExpectationFailed",
+          "Teapot",
+          "MisdirectedRequest",
+          "UnprocessableEntity",
+          "Locked",
+          "FailedDependency",
+          "TooEarly",
+          "UpgradeRequired",
+          "PreconditionRequired",
+          "TooManyRequests",
+          "RequestHeaderFieldsTooLarge",
+          "UnavailableForLegalReasons",
+          "InternalServerError",
+          "NotImplemented",
+          "BadGateway",
+          "ServiceUnavailable",
+          "GatewayTimeout",
+          "HTTPVersionNotSupported",
+          "VariantAlsoNegotiates",
+          "InsufficientStorage",
+          "LoopDetected",
+          "NotExtended",
+          "NetworkAuthenticationRequired"
+        ]
+      },
+      "patternProperties": {
+        "^[A-Z][a-z]*([A-Z][a-z]*)*$": {
+          "$ref": "#/definitions/errors"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "errors": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[0-9A-Z]{2}$"
+      },
+      "patternProperties": {
+        "^[0-9a-z]{2}$": {
+          "type": "object",
+          "required": ["key", "msg"],
+          "properties": {
+            "key": {
+              "type": "string",
+              "pattern": "^[A-Z][a-z]*([A-Z][a-z]*)*$"
+            },
+            "msg": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

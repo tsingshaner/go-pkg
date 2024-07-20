@@ -1,37 +1,37 @@
 package errors
 
-type restError struct {
-	basic  *basicError
+type restError[T Coder] struct {
+	basic  *basicError[T]
 	status int
 }
 
-type RESTError interface {
-	BasicError
+type RESTError[T Coder] interface {
+	BasicError[T]
 	Status() int
 }
 
-var _ RESTError = &restError{}
+var _ RESTError[int] = &restError[int]{}
 
-func (e *restError) Code() int {
+func (e *restError[T]) Code() T {
 	return e.basic.Code()
 }
 
-func (e *restError) Error() string {
+func (e *restError[T]) Error() string {
 	return e.basic.Error()
 }
 
-func (e *restError) Status() int {
+func (e *restError[T]) Status() int {
 	return e.status
 }
 
-func (e *restError) Is(target error) bool {
-	if restErr, ok := target.(RESTError); ok && restErr.Status() == e.status {
-		return e.basic.code == restErr.Code()
+func (e *restError[T]) Is(target error) bool {
+	if restErr, ok := target.(RESTError[T]); ok {
+		return e == restErr
 	}
 
 	return false
 }
 
-func NewREST(status, code int, msg string) error {
-	return &restError{&basicError{msg, code}, status}
+func NewREST[T Coder](status int, code T, msg string) error {
+	return &restError[T]{&basicError[T]{msg, code}, status}
 }
