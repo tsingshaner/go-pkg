@@ -56,22 +56,30 @@ func formatStruct(sb *strings.Builder, prefix string, obj any) {
 		v = v.Elem()
 	}
 
-	if v.Kind() != reflect.Struct {
+	if v.Kind() != reflect.Struct && v.Kind() != reflect.Map {
 		sb.WriteString(fmt.Sprintf("%v", v))
 		return
 	}
 
-	t := v.Type()
+	fieldPrefix := "\n" + prefix
 
-	for i := 0; i < v.NumField(); i++ {
-		field := v.Field(i)
-		sb.WriteString(fmt.Sprintf(
-			"\n%s%s %s: ",
-			prefix,
-			color.UnsafeCyan(t.Field(i).Name),
-			color.UnsafeYellow(t.Field(i).Type.String())),
-		)
-
-		formatStruct(sb, "  "+prefix, field.Interface())
+	if v.Kind() == reflect.Map {
+		for _, key := range v.MapKeys() {
+			sb.WriteString(fieldPrefix)
+			sb.WriteString(color.UnsafeCyan(fmt.Sprintf("%v", key)))
+			sb.WriteString(": ")
+			formatStruct(sb, "  "+prefix, v.MapIndex(key).Interface())
+		}
+	} else {
+		t := v.Type()
+		for i := 0; i < v.NumField(); i++ {
+			field := v.Field(i)
+			sb.WriteString(fieldPrefix)
+			sb.WriteString(color.UnsafeCyan(t.Field(i).Name))
+			sb.WriteByte(' ')
+			sb.WriteString(color.UnsafeYellow(t.Field(i).Type.String()))
+			sb.WriteString(": ")
+			formatStruct(sb, "  "+prefix, field.Interface())
+		}
 	}
 }
