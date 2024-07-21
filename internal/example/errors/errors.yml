@@ -19,15 +19,11 @@ rest:
       key: User
       msg: User Not found
 
-    "02":
-      key: NotFound
-      msg: User Not found
-
-  OK:
+  Unauthorized:
     "00":
       key: Login
-      msg: 登录成功
+      msg: Username or password error
 
     "01":
-      key: Register
-      msg: 注册成功
+      key: TokenExpired
+      msg: Access token expired

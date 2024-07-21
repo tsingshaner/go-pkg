@@ -32,6 +32,7 @@ func JSONReader(fns ...util.WithFn[ReaderOptions]) {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		log := scanner.Bytes()
+		o = make(map[string]any)
 
 		if err := sonic.ConfigFastest.Unmarshal(log, &o); err != nil {
 			opts.ErrorHandler(log, err)

@@ -2,7 +2,7 @@
 version: "3"
 
 vars:
-  MODS: [color, errors, log, oss, util]
+  MODS: [conf, prettylog, color, errors, log, oss, util]
 
 env:
   GO111MODULE: on
@@ -50,6 +50,12 @@ tasks:
     cmds:
       - task: githooks
       - go mod download
+
+  lint:
+    desc: run linters
+    cmds:
+      - for: { var: MODS }
+        cmd: golangci-lint run ./{{.ITEM}}/...
 
   tidy:
     desc: go mod tidy for all sub packages

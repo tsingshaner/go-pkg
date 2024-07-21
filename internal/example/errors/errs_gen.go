@@ -18,21 +18,18 @@ var Basic = struct {
 }
 
 var NotFound = struct {
-	// NotFound "M040402": "User Not found"
-	NotFound error
 	// User "M040400": "User Not found"
 	User error
 }{
-	errors.NewREST(http.StatusNotFound, "M040402", "User Not found"),
 	errors.NewREST(http.StatusNotFound, "M040400", "User Not found"),
 }
 
-var OK = struct {
-	// Login "M020000": "登录成功"
+var Unauthorized = struct {
+	// Login "M040100": "Username or password error"
 	Login error
-	// Register "M020001": "注册成功"
-	Register error
+	// TokenExpired "M040101": "Access token expired"
+	TokenExpired error
 }{
-	errors.NewREST(http.StatusOK, "M020000", "登录成功"),
-	errors.NewREST(http.StatusOK, "M020001", "注册成功"),
+	errors.NewREST(http.StatusUnauthorized, "M040100", "Username or password error"),
+	errors.NewREST(http.StatusUnauthorized, "M040101", "Access token expired"),
 }

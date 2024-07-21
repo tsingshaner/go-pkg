@@ -32,6 +32,7 @@
 		"gookit",
 		"gorm",
 		"mapstructure",
+		"nolint",
 		"prettylog",
 		"primarykey",
 		"println",
