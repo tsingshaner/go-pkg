@@ -2,43 +2,35 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Server app YAML Schema",
   "description": "Schema for server configuration file",
-  "required": ["file", "pkg", "modCode", "basic", "rest"],
+  "required": ["file", "pkg", "modCode"],
   "properties": {
     "file": {
       "type": "string",
-      "pattern": ".go$",
-      "description": "the file name of generate go file"
+      "pattern": "^.*\\.go$",
+      "description": "the file name of generate go file for errors"
     },
     "pkg": {
       "type": "string",
-      "description": "the package name of generate go file"
+      "description": "the package name of generate go file for errors"
     },
     "modCode": {
-      "description": "base error code, all error codes will be calculated as baseCode + error code",
+      "description": "base error code, all error codes will be have this as prefix",
       "type": "string",
       "pattern": "^[0-9A-Z]{2}$"
     },
     "basic": {
+      "description": "define some basic error use errors.NewBasic('MMCC', 'msg')",
       "$ref": "#/definitions/errors"
     },
     "rest": {
       "type": "object",
+      "description": "define some rest error use lick errors.NewREST(404, 'MM404CC', 'msg')",
       "propertyNames": {
         "enum": [
           "Continue",
           "SwitchingProtocols",
           "Processing",
           "EarlyHints",
-          "OK",
-          "Created",
-          "Accepted",
-          "NonAuthoritativeInfo",
-          "NoContent",
-          "ResetContent",
-          "PartialContent",
-          "MultiStatus",
-          "AlreadyReported",
-          "IMUsed",
           "MultipleChoices",
           "MovedPermanently",
           "Found",

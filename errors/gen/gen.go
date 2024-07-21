@@ -49,7 +49,7 @@ func GeneratePkg(c *ErrorConfig) {
 		console.Fatal("%+v", err)
 	}
 
-	console.Info("generate error pkg %s success", c.File)
+	console.Info("generate pkg %s success", c.File)
 }
 
 func ReadErrors() *ErrorConfig {
@@ -85,7 +85,7 @@ func GenErrorPkgData(conf *ErrorConfig) *ErrorPkgTemplateData {
 
 	for code, basic := range conf.BasicErr {
 		data.BasicErrs = append(data.BasicErrs, ErrorObj{
-			Code:  conf.ModCode + code,
+			Code:  strings.ToUpper(conf.ModCode + code),
 			Error: basic,
 		})
 	}
@@ -97,7 +97,7 @@ func GenErrorPkgData(conf *ErrorConfig) *ErrorPkgTemplateData {
 			data.RestErrs[statusStr] = append(data.RestErrs[statusStr], RestErrorObj{
 				Status: TranslateStatus(status),
 				ErrorObj: ErrorObj{
-					Code:  conf.ModCode + strconv.Itoa(HttpStatus[statusStr]) + code,
+					Code:  strings.ToUpper(conf.ModCode + strconv.Itoa(HttpStatus[statusStr]) + code),
 					Error: err,
 				},
 			})
