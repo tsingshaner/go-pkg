@@ -19,7 +19,6 @@ func BenchmarkZapSlog(b *testing.B) {
 	)
 	logger := NewZapLog(core)
 
-	defer logger.Sync()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.Info("constructed a logger")
@@ -30,6 +29,8 @@ func BenchmarkZapSlog(b *testing.B) {
 			slog.Duration("time", time.Nanosecond),
 		)
 	}
+
+	_ = logger.Sync()
 }
 
 func BenchmarkOriginZap(b *testing.B) {
@@ -42,7 +43,6 @@ func BenchmarkOriginZap(b *testing.B) {
 	)
 	logger := zap.New(core)
 
-	defer logger.Sync()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.Info("constructed a logger")
@@ -53,6 +53,8 @@ func BenchmarkOriginZap(b *testing.B) {
 			zap.Duration("time", time.Nanosecond),
 		)
 	}
+
+	_ = logger.Sync()
 }
 
 func BenchmarkZapSlogWithSource(b *testing.B) {
@@ -63,7 +65,6 @@ func BenchmarkZapSlogWithSource(b *testing.B) {
 	)
 	logger := NewZapLog(core, zap.AddCaller(), zap.AddCallerSkip(2))
 
-	defer logger.Sync()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.Info("constructed a logger")
@@ -74,6 +75,7 @@ func BenchmarkZapSlogWithSource(b *testing.B) {
 			slog.Duration("time", time.Nanosecond),
 		)
 	}
+	_ = logger.Sync()
 }
 
 func BenchmarkOriginZapWithSource(b *testing.B) {
@@ -86,7 +88,6 @@ func BenchmarkOriginZapWithSource(b *testing.B) {
 	)
 	logger := zap.New(core, zap.AddCaller())
 
-	defer logger.Sync()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.Info("constructed a logger")
@@ -97,6 +98,7 @@ func BenchmarkOriginZapWithSource(b *testing.B) {
 			zap.Duration("time", time.Nanosecond),
 		)
 	}
+	_ = logger.Sync()
 }
 
 func BenchmarkOriginZapDisable(b *testing.B) {
@@ -109,7 +111,6 @@ func BenchmarkOriginZapDisable(b *testing.B) {
 	)
 	logger := zap.New(core, zap.AddCaller())
 
-	defer logger.Sync()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.Info("constructed a logger")
@@ -120,6 +121,7 @@ func BenchmarkOriginZapDisable(b *testing.B) {
 			zap.Duration("time", time.Nanosecond),
 		)
 	}
+	_ = logger.Sync()
 }
 
 func BenchmarkZapSlogDisable(b *testing.B) {
@@ -130,7 +132,6 @@ func BenchmarkZapSlogDisable(b *testing.B) {
 	)
 	logger := NewZapLog(core, zap.AddCaller(), zap.AddCallerSkip(2))
 
-	defer logger.Sync()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.Info("constructed a logger")
@@ -141,4 +142,5 @@ func BenchmarkZapSlogDisable(b *testing.B) {
 			slog.Duration("time", time.Nanosecond),
 		)
 	}
+	_ = logger.Sync()
 }

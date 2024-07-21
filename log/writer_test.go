@@ -36,7 +36,7 @@ func TestWriter(t *testing.T) {
 
 	assert.Implements(t, (*io.Writer)(nil), writer)
 
-	writer.Write([]byte("test"))
+	_, _ = writer.Write([]byte("test"))
 
 	assert.Equal(t, 1, board1.Size())
 	assert.Equal(t, 1, board2.Size())
@@ -49,7 +49,7 @@ func TestWriterWithNil(t *testing.T) {
 	board := &mockedBoard{}
 	writer := NewWriter(board, nil)
 
-	writer.Write([]byte("test"))
+	_, _ = writer.Write([]byte("test"))
 
 	assert.Equal(t, 1, board.Size())
 	assert.Equal(t, "test", string(board.records[0]))
