@@ -1,5 +1,7 @@
 package errors
 
+import "errors"
+
 // Code returns the code of the error. If the error does not have a code, it returns -1, false.
 func Code[T Coder](e error) (code T, ok bool) {
 	if e, ok := e.(interface{ Code() T }); ok {
@@ -17,10 +19,16 @@ func Status(e error) (status int, ok bool) {
 	return -1, false
 }
 
-func Msg(e error) (msg string, ok bool) {
-	if e, ok := e.(interface{ Msg() string }); ok {
-		return e.Msg(), true
+// Extract try to extract the target error from the error chain, use errors.As, if the error is not the target, it returns nil.
+func Extract[T error](e error) *T {
+	if e == nil {
+		return nil
 	}
 
-	return "", false
+	target := new(T)
+	if errors.As(e, target) {
+		return target
+	}
+
+	return nil
 }
