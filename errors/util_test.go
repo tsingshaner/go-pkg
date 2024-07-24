@@ -57,10 +57,39 @@ func TestExtract(t *testing.T) {
 	restErr := errors.Join(NewREST(404, "x2", "rest"))
 	err := errors.Join(restErr, basicErr)
 
-	assert.Nil(t, Extract[BasicError[string]](nil))
-	assert.Nil(t, Extract[BasicError[int]](errors.New("basic")))
-	assert.NotNil(t, Extract[BasicError[int]](err))
+	{
+		e, ok := Extract[BasicError[int]](nil)
+		assert.False(t, ok)
+		assert.Nil(t, e)
+	}
 
-	assert.Equal(t, basicErr, *Extract[BasicError[int]](err))
-	assert.Equal(t, restErr.Error(), (*Extract[RESTError[string]](err)).Error())
+	{
+		e, ok := Extract[BasicError[int]](errors.New("basic"))
+		assert.False(t, ok)
+		assert.Nil(t, e)
+	}
+
+	{
+		e, ok := Extract[BasicError[string]](basicErr)
+		assert.False(t, ok)
+		assert.Nil(t, e)
+	}
+
+	{
+		e, ok := Extract[BasicError[int]](err)
+		assert.True(t, ok)
+		assert.NotNil(t, e)
+		assert.Equal(t, basicErr, e)
+		assert.Equal(t, basicErr.Error(), e.Error())
+		assert.Equal(t, 1, e.Code())
+	}
+
+	{
+		e, ok := Extract[RESTError[string]](err)
+		assert.True(t, ok)
+		assert.NotNil(t, e)
+		assert.True(t, errors.Is(restErr, e))
+		assert.Equal(t, restErr.Error(), e.Error())
+		assert.Equal(t, 404, e.Status())
+	}
 }

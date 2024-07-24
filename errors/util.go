@@ -20,15 +20,14 @@ func Status(e error) (status int, ok bool) {
 }
 
 // Extract try to extract the target error from the error chain, use errors.As, if the error is not the target, it returns nil.
-func Extract[T error](e error) *T {
+func Extract[T error](e error) (target T, ok bool) {
 	if e == nil {
-		return nil
+		return target, false
 	}
 
-	target := new(T)
-	if errors.As(e, target) {
-		return target
+	if errors.As(e, &target) {
+		return target, true
 	}
 
-	return nil
+	return target, false
 }
