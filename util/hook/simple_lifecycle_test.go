@@ -8,12 +8,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSimpleLifeCircle(t *testing.T) {
+func TestSimpleLifecycle(t *testing.T) {
 	type service struct {
 		count int
 	}
 
-	slc := NewSimpleLifeCircle[*service]()
+	slc := NewSimpleLifecycle[*service]()
 	slc.OnInit(func(s *service) error {
 		s.count++
 		return nil
@@ -41,14 +41,14 @@ func TestSimpleLifeCircle(t *testing.T) {
 	assert.Nil(t, <-slc.DoneError())
 	assert.Equal(t, 0, s.count)
 
-	assert.True(t, errors.Is(slc.Run(ctx, s), ErrLifeCircleIsDead))
+	assert.True(t, errors.Is(slc.Run(ctx, s), ErrLifecycleIsDead))
 }
 
-func TestSimpleLifeCircleWithInitError(t *testing.T) {
+func TestSimpleLifecycleWithInitError(t *testing.T) {
 
 	err := errors.New("init error")
 
-	slc := NewSimpleLifeCircle[any]()
+	slc := NewSimpleLifecycle[any]()
 	slc.OnInit(func(_ any) error {
 		return err
 	})

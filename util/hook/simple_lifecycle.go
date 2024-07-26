@@ -5,7 +5,7 @@ import (
 	"errors"
 )
 
-type SimpleLifeCircle[T any] interface {
+type SimpleLifecycle[T any] interface {
 	// Run starts the life circle with the given data, if context is nil, it will return an error.
 	//
 	// Will emit Init event when call Run
@@ -21,7 +21,7 @@ type SimpleLifeCircle[T any] interface {
 	Done()
 }
 
-type simpleLifeCircle[T any] struct {
+type simpleLifecycle[T any] struct {
 	cancel     func()
 	dead       bool
 	init       Hooker[T]
@@ -29,32 +29,32 @@ type simpleLifeCircle[T any] struct {
 	doneErrors chan error
 }
 
-func NewSimpleLifeCircle[T any]() SimpleLifeCircle[T] {
-	return &simpleLifeCircle[T]{
+func NewSimpleLifecycle[T any]() SimpleLifecycle[T] {
+	return &simpleLifecycle[T]{
 		init:       New[T](),
 		done:       New[T](),
 		doneErrors: make(chan error, 1),
 	}
 }
 
-func (s *simpleLifeCircle[T]) OnInit(handler Handler[T]) (off func()) {
+func (s *simpleLifecycle[T]) OnInit(handler Handler[T]) (off func()) {
 	return s.init.On(handler)
 }
 
-func (s *simpleLifeCircle[T]) OnDone(handler Handler[T]) (off func()) {
+func (s *simpleLifecycle[T]) OnDone(handler Handler[T]) (off func()) {
 	return s.done.On(handler)
 }
 
 var (
-	ErrNilContext       = errors.New("SimpleLifeCircle.Run with a nil context.Context")
-	ErrLifeCircleIsDead = errors.New("SimpleLifeCircle.Run with a dead life circle")
+	ErrNilContext      = errors.New("SimpleLifecycle.Run with a nil context.Context")
+	ErrLifecycleIsDead = errors.New("SimpleLifecycle.Run with a dead life circle")
 )
 
-func (s *simpleLifeCircle[T]) Run(ctx context.Context, data T) error {
+func (s *simpleLifecycle[T]) Run(ctx context.Context, data T) error {
 	if ctx == nil {
 		return ErrNilContext
 	} else if s.dead {
-		return ErrLifeCircleIsDead
+		return ErrLifecycleIsDead
 	}
 
 	if err := s.init.Trigger(data); err != nil {
@@ -73,12 +73,12 @@ func (s *simpleLifeCircle[T]) Run(ctx context.Context, data T) error {
 	return nil
 }
 
-func (s *simpleLifeCircle[T]) Done() {
+func (s *simpleLifecycle[T]) Done() {
 	if s.cancel != nil && !s.dead {
 		s.cancel()
 	}
 }
 
-func (s *simpleLifeCircle[T]) DoneError() <-chan error {
+func (s *simpleLifecycle[T]) DoneError() <-chan error {
 	return s.doneErrors
 }
