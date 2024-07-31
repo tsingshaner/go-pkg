@@ -21,6 +21,21 @@ type config[T any] struct {
 	viper   *viper.Viper
 }
 
+// Read a simple function to read the configuration from the configuration file,
+// will exit if load error
+//
+// accepted cmd args:
+// --config  the path to the configuration file
+// --silence silence the output of config loading
+func Read[T any]() *T {
+	c := New(new(T), ParseArgs())
+	if err := c.Load(); err != nil {
+		console.Fatal("load config error: %+v", err)
+	}
+
+	return c.Value
+}
+
 func New[T any](conf *T, opts *Options) *config[T] {
 	if reflect.ValueOf(conf).Elem().Kind() != reflect.Struct {
 		console.Fatal("store must be a struct ptr")
