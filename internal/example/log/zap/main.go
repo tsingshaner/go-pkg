@@ -66,7 +66,7 @@ func exampleCustomZap() {
 	namedLogger.Info("not print")
 	namedLogger.Warn("not print")
 	namedLogger.Error("error print")
-	namedLogger.Fatal("fatal print")
+	namedLogger.Fatal("fatal print", slog.String("err", "fatal error"))
 
 	stackLevelToggler(log.LevelFatal)
 	namedLogger.Error("error print without stack")

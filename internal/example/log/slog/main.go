@@ -69,7 +69,7 @@ func exampleCustomSlog(w io.Writer) {
 	grouped.Info("not print")
 	grouped.Warn("not print")
 	grouped.Error("error print")
-	grouped.Fatal("fatal print", slog.String("key", "value"))
+	grouped.Fatal("fatal print", slog.String("key", "value"), slog.String("err", "fatal error"))
 
 	childWithStack := grouped.WithOptions(&log.ChildLoggerOptions{
 		AddSource:  true,

@@ -36,6 +36,7 @@
 		"prettylog",
 		"primarykey",
 		"println",
+		"requestid",
 		"rotatefile",
 		"stretchr",
 		"struct",
