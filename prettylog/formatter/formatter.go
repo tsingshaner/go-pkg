@@ -1,6 +1,7 @@
 package formatter
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -15,6 +16,12 @@ type Group struct {
 	Value Data
 }
 
+type Node struct {
+	Key      string
+	Data     Data
+	Children []*Node
+}
+
 type Log interface {
 	Name() string
 	Level() string
@@ -25,6 +32,7 @@ type Log interface {
 	Err() string
 	Stack() string
 	Groups() []Group
+	Tree() *Node
 }
 
 var propertyPrefix = color.Bold(color.UnsafeDim("    » "))
@@ -35,6 +43,8 @@ func Formatter(log Log) string {
 		return FormatGinRouter(log)
 	case strings.HasSuffix(log.Name(), helper.NameGORMLoggerSuffix):
 		return FormatGorm(log)
+	case strings.HasSuffix(log.Name(), helper.NameGinHttpLoggerSuffix):
+		return FormatGinHttp(log)
 	}
 
 	sb := strings.Builder{}
@@ -70,14 +80,22 @@ func Formatter(log Log) string {
 		sb.WriteString(Groups(log.Groups(), propertyPrefix, "ctx").String())
 	}
 
-	sb.WriteByte('\n')
-
-	if log.Stack() != "" {
-		sb.WriteString(propertyPrefix)
-		sb.WriteString(color.UnsafeBold(color.UnsafeBlue("stack ")))
-		sb.WriteString(color.UnsafeDim(log.Stack()))
-		sb.WriteByte('\n')
+	if log.Err() != "" {
+		fmt.Fprintf(&sb, "\n%s%s %s",
+			propertyPrefix,
+			ErrorField,
+			FormatError(log.Err()),
+		)
 	}
 
+	if log.Stack() != "" {
+		fmt.Fprintf(&sb, "\n%s%s %s",
+			propertyPrefix,
+			color.UnsafeBold(color.UnsafeBlue("stack")),
+			color.UnsafeDim(log.Stack()),
+		)
+	}
+
+	sb.WriteByte('\n')
 	return sb.String()
 }

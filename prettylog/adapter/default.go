@@ -16,10 +16,14 @@ type defaultLog struct {
 	err    string
 	stack  string
 	groups []formatter.Group
+	data   *formatter.Node
 }
 
 func DefaultAdaptor(data formatter.Data, _ []byte) formatter.Log {
-	l := &defaultLog{groups: parseGroups("", data)}
+	l := &defaultLog{
+		data:   parseNode("", data),
+		groups: parseGroups("", data),
+	}
 
 	for _, group := range l.groups {
 		if level, ok := group.Value["level"].(string); ok {
@@ -67,6 +71,10 @@ func DefaultAdaptor(data formatter.Data, _ []byte) formatter.Log {
 	}
 
 	return l
+}
+
+func (dl *defaultLog) Tree() *formatter.Node {
+	return dl.data
 }
 
 func (dl *defaultLog) Name() string {
@@ -119,4 +127,20 @@ func parseGroups(name string, data formatter.Data) []formatter.Group {
 	}
 
 	return groups
+}
+
+func parseNode(name string, data formatter.Data) *formatter.Node {
+	node := &formatter.Node{
+		Key:  name,
+		Data: data,
+	}
+
+	for k, v := range data {
+		if sub, ok := v.(formatter.Data); ok {
+			delete(data, k)
+			node.Children = append(node.Children, parseNode(k, sub))
+		}
+	}
+
+	return node
 }
