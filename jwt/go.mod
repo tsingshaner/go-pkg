@@ -6,7 +6,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/tsingshaner/go-pkg/errors v0.4.0
 	github.com/tsingshaner/go-pkg/log v0.4.0
-	github.com/tsingshaner/go-pkg/util v0.6.0
+	github.com/tsingshaner/go-pkg/util v0.3.0
 )
 
 require (
