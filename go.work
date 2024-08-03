@@ -5,6 +5,7 @@ use (
 	./conf
 	./errors
 	./internal
+	./jwt
 	./log
 	./oss
 	./prettylog
