@@ -80,7 +80,7 @@ func FormatGinHttp(log Log) string {
 	}
 
 	if reqBody, ok := req["body"].(string); ok && reqBody != "" {
-		fmt.Fprintf(sb, "\n  %s %s", respPrefix, formatBody(reqBody))
+		fmt.Fprintf(sb, "\n  %s %s", reqPrefix, formatBody(reqBody))
 	}
 
 	if userAgent, ok := req["userAgent"].(string); ok && userAgent != "" {
