@@ -19,6 +19,7 @@ type ExpRetrySvc[T any] struct {
 
 func New[T any](runner Runner[T], fns ...util.WithFn[ExpRetrySvc[T]]) *ExpRetrySvc[T] {
 	return util.BuildWithOpts(&ExpRetrySvc[T]{
+		Runner:     runner,
 		Delay:      time.Second,
 		RetryTimes: 3,
 		ErrorHandler: func(e error, times int) {
