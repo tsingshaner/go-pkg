@@ -7,8 +7,8 @@ import (
 )
 
 type bitmaskCase struct {
-	mask int
-	flag int
+	mask uint
+	flag uint
 }
 
 func TestHas(t *testing.T) {
@@ -30,14 +30,12 @@ func TestHas(t *testing.T) {
 func TestToggle(t *testing.T) {
 	cases := []struct {
 		bitmaskCase
-		want int
+		want uint
 	}{
 		{bitmaskCase{1, 1}, 0},
 		{bitmaskCase{1, 2}, 3},
 		{bitmaskCase{3, 1}, 2},
 		{bitmaskCase{3, 2}, 1},
-		{bitmaskCase{-1, 1}, -2},
-		{bitmaskCase{-1, 2}, -3},
 	}
 
 	for _, c := range cases {
