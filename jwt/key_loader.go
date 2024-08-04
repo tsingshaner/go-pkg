@@ -88,16 +88,16 @@ func (j JWA) build() (*KeyItem, error) {
 	var err error
 	switch ALG(j.Alg) {
 	case ES256, ES384, ES512:
-		item.PrivateKey, item.PublicKey, err = loadPEM(j.Pem,
-			jwt.ParseECPrivateKeyFromPEM, jwt.ParseECPublicKeyFromPEM,
+		item.PublicKey, item.PrivateKey, err = loadPEM(j.Pem,
+			jwt.ParseECPublicKeyFromPEM, jwt.ParseECPrivateKeyFromPEM,
 		)
 	case RS256, RS384, RS512, PS256, PS384, PS512:
-		item.PrivateKey, item.PublicKey, err = loadPEM(j.Pem,
-			jwt.ParseRSAPrivateKeyFromPEM, jwt.ParseRSAPublicKeyFromPEM,
+		item.PublicKey, item.PrivateKey, err = loadPEM(j.Pem,
+			jwt.ParseRSAPublicKeyFromPEM, jwt.ParseRSAPrivateKeyFromPEM,
 		)
 	case EdDSA:
-		item.PrivateKey, item.PublicKey, err = loadPEM(j.Pem,
-			jwt.ParseEdPrivateKeyFromPEM, jwt.ParseEdPublicKeyFromPEM,
+		item.PublicKey, item.PrivateKey, err = loadPEM(j.Pem,
+			jwt.ParseEdPublicKeyFromPEM, jwt.ParseEdPrivateKeyFromPEM,
 		)
 	default:
 		err = ErrMethodNotFound
