@@ -85,8 +85,7 @@ github.com/tsingshaner/go-pkg/log v0.4.0 h1:dQHifAtVlNH8f3AwLb4ub6D2a82fjKuwpElf
 github.com/tsingshaner/go-pkg/log v0.4.0/go.mod h1:OvpDNMetL/2M0H5LtH1ZIqx72nkNj9FAO/DLy6LdbqI=
 github.com/tsingshaner/go-pkg/prettylog v0.1.2 h1:TLO0Q/+kzxoF8lReOzrJkqMiBsZiJxERcmTgUiVYh1A=
 github.com/tsingshaner/go-pkg/prettylog v0.1.2/go.mod h1:vzkHM6nYcT+7eJ8k51NlSllZTmaEOSxaBnaS8FGior8=
-github.com/tsingshaner/go-pkg/util v0.3.0 h1:MXS/wIQGbtvcnKpxRBHxhOv644Z6l7CzMT76gsZPePo=
-github.com/tsingshaner/go-pkg/util v0.3.0/go.mod h1:m1ZX3BQYxJHqToMhm0QL7byg3jrUjGcZvqUiqJS5Zog=
+github.com/tsingshaner/go-pkg/util v0.7.0 h1:mii+fe4prQq8qw+GqlINoeC6ys4nA7uqPXtGfbUxlpk=
 github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS4MhqMhdFk5YI=
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go/codec v1.2.12 h1:9LC83zGrHhuUA9l16C9AHXAqEV/2wBQ4nkvumAE65EE=

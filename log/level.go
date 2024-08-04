@@ -8,7 +8,7 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-type Level = int8
+type Level = uint8
 type LevelToggler func(Level)
 
 // LogLevel is a wrapper for dynamically changing log level.

@@ -22,7 +22,7 @@ require (
 
 require (
 	github.com/tsingshaner/go-pkg/prettylog v0.1.2
-	github.com/tsingshaner/go-pkg/util v0.3.0
+	github.com/tsingshaner/go-pkg/util v0.7.0
 )
 
 require (
