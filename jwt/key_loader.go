@@ -32,6 +32,10 @@ const (
 	ES384 ALG = "ES384"
 	ES512 ALG = "ES512"
 
+	PS256 ALG = "PS256"
+	PS384 ALG = "PS384"
+	PS512 ALG = "PS512"
+
 	RS256 ALG = "RS256"
 	RS384 ALG = "RS384"
 	RS512 ALG = "RS512"
@@ -87,13 +91,13 @@ func (j JWA) build() (*KeyItem, error) {
 		item.PrivateKey, item.PublicKey, err = loadPEM(j.Pem,
 			jwt.ParseECPrivateKeyFromPEM, jwt.ParseECPublicKeyFromPEM,
 		)
-	case RS256, RS384, RS512:
+	case RS256, RS384, RS512, PS256, PS384, PS512:
 		item.PrivateKey, item.PublicKey, err = loadPEM(j.Pem,
-			jwt.ParseRSAPublicKeyFromPEM, jwt.ParseRSAPrivateKeyFromPEM,
+			jwt.ParseRSAPrivateKeyFromPEM, jwt.ParseRSAPublicKeyFromPEM,
 		)
 	case EdDSA:
 		item.PrivateKey, item.PublicKey, err = loadPEM(j.Pem,
-			jwt.ParseEdPublicKeyFromPEM, jwt.ParseEdPrivateKeyFromPEM,
+			jwt.ParseEdPrivateKeyFromPEM, jwt.ParseEdPublicKeyFromPEM,
 		)
 	default:
 		err = ErrMethodNotFound
