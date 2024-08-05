@@ -15,7 +15,7 @@ type Options struct {
 	Silence bool
 }
 
-type config[T any] struct {
+type Config[T any] struct {
 	Value   *T
 	options *Options
 	viper   *viper.Viper
@@ -36,16 +36,16 @@ func Read[T any]() *T {
 	return c.Value
 }
 
-func New[T any](conf *T, opts *Options) *config[T] {
+func New[T any](conf *T, opts *Options) *Config[T] {
 	if reflect.ValueOf(conf).Elem().Kind() != reflect.Struct {
 		console.Fatal("store must be a struct ptr")
 	}
 
-	return &config[T]{conf, opts, viper.New()}
+	return &Config[T]{conf, opts, viper.New()}
 }
 
 // Load read & unmarshal config from configuration file
-func (c *config[T]) Load() error {
+func (c *Config[T]) Load() error {
 	c.viper.SetConfigFile(c.options.FilePath)
 
 	if err := c.viper.ReadInConfig(); err != nil {
@@ -55,7 +55,7 @@ func (c *config[T]) Load() error {
 	return c.unmarshal()
 }
 
-func (c *config[T]) unmarshal() error {
+func (c *Config[T]) unmarshal() error {
 	if err := c.viper.Unmarshal(c.Value); err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ type Event = fsnotify.Event
 
 // Watch watch the configuration file changes
 // if you want to reload the configuration, you should call the Load method in the listener
-func (c *config[T]) Watch(listener func(Event)) {
+func (c *Config[T]) Watch(listener func(Event)) {
 	c.viper.OnConfigChange(listener)
 	c.viper.WatchConfig()
 }
