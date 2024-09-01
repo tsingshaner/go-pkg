@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+env:
+  GO111MODULE: on
+  GOPROXY: https://goproxy.cn,direct
+
+tasks:
+  test:
+    desc: run all tests
+    cmds:
+      - task: errors.unit
+      - task: oss.setup
+      - go test -v ./...
+
