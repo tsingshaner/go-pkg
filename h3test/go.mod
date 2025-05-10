@@ -1,6 +1,6 @@
 module github.com/tsingshaner/go-pkg/h3test
 
-go 1.23.0
+go 1.23
 
 require github.com/tsingshaner/go-pkg/log v0.4.1
 
