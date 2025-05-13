@@ -1,51 +1,27 @@
 {
-	"explorer.fileNesting.enabled": true,
-	"explorer.fileNesting.expand": false,
-	"explorer.fileNesting.patterns": {
-    "taskfile.yml": "go.work, go.work.sum, go.mod, go.sum",
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.insertSpaces": false
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.sort.json": "explicit"
+  },
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "*.go": "${capture}_test.go, ${capture}_bench_test.go",
     "go.mod": "go.sum",
-		"go.work": "go.work.sum, .gitignore, .gitattributes, .gitmodules, .gitmessage, .mailmap, .git-blame*, .editorconfig",
-		"README.md": "LICENSE",
-		"*.go": "${capture}_test.go, ${capture}_bench_test.go"
-	},
-	"go.formatTool": "gofmt",
-	"go.lintOnSave": "package",
-	"[go]": {
-		"editor.defaultFormatter": "golang.go",
-		"editor.insertSpaces": false,
-		"editor.formatOnSave": true,
-		"editor.codeActionsOnSave": {
-			"source.fixAll": "explicit"
-		}
-	},
-	"cSpell.words": [
-		"allocs",
-		"bitmask",
-		"bytedance",
-		"covdata",
-		"covermode",
-		"coverprofile",
-		"errorgen",
-		"fsnotify",
-		"GOCOVERDIR",
-		"gomod",
-		"gookit",
-		"gorm",
-		"mapstructure",
-		"nolint",
-		"prettylog",
-		"primarykey",
-		"println",
-		"requestid",
-		"rotatefile",
-		"stretchr",
-		"struct",
-		"Syncer",
-		"taskfile",
-		"testdata",
-		"textfmt",
-		"tsingshaner",
-		"varchar",
-		"zapslog"
-	]
+    "go.work": "go.work.sum"
+  },
+  "go.formatTool": "gofmt",
+  "go.lintOnSave": "package"
 }

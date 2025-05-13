@@ -1,0 +1,42 @@
+ignorePaths:
+  - ./**/*/go.mod
+  - ./**/*/go.sum
+  - go.work.sum
+
+ignoreWords:
+  - allocs
+  - bitmask
+  - bytedance
+  - covdata
+  - covermode
+  - coverprofile
+  - errorgen
+  - fsnotify
+  - GOCOVERDIR
+  - gomod
+  - gookit
+  - GOPROXY
+  - gorm
+  - mapstructure
+  - nolint
+  - prettylog
+  - primarykey
+  - println
+  - requestid
+  - rotatefile
+  - stretchr
+  - Strikethrough
+  - struct
+  - Syncer
+  - taskfile
+  - testdata
+  - textfmt
+  - tsingshaner
+  - varchar
+  - zapslog
+  - golangci
+  - webp
+
+words:
+  - isatty
+  - mattn

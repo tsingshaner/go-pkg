@@ -2,7 +2,7 @@
 version: "3"
 
 vars:
-  MODS: [conf, prettylog, color, errors, log, oss, util]
+  MODS: [color, conf, log, prettylog, errors, oss, util]
 
 env:
   GO111MODULE: on
@@ -43,7 +43,7 @@ tasks:
 
   githooks:
     desc: setup git hooks
-    cmd: git config core.hooksPath ./internal/githooks
+    cmd: git config core.hooksPath ./githooks
 
   setup:
     desc: setup project
